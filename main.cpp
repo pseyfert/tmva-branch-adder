@@ -57,7 +57,7 @@ int reader_wrapper::GetEntry(Long64_t e) {
   for (auto b: m_branches) {
     b->GetEntry(e);
   }
-  for (auto v : m_variables) {
+  for (auto& v : m_variables) {
     v.value = v.ttreeformula->EvalInstance();
   }
   m_response = m_reader->EvaluateMVA(m_methodName.Data());
@@ -69,15 +69,13 @@ int reader_wrapper::initFormulas() {
   /// don't care about spectators here
   m_outtree = m_intree->CloneTree(-1,"fast");
   int buffer(0);
-  for (auto var : m_variables) {
+  for (auto& var : m_variables) {
     var.ttreeformula = new TTreeFormula(Form("local_var_%d",buffer++),var.formula,m_outtree);
-  }
-  m_outtree->SetBranchStatus("*",0);
-  for (auto var : m_variables) {
     for (size_t v = 0 ; v < var.ttreeformula->GetNcodes() ; ++v) {
       m_branches.insert(var.ttreeformula->GetLeaf(v)->GetBranch());
     }
   }
+  m_outtree->SetBranchStatus("*",0);
   for (auto b : m_branches) {
     b->SetStatus(1);
   }
@@ -119,7 +117,7 @@ int reader_wrapper::getVariables(TString xml_file_name) {
         m_spectators.push_back(VariableWrapper(TString(readSpecInfo.GetExpression())));
         ch = TMVA::gTools().GetNextChild(ch);
       }
-      if (m_spectators.size()!=readNVar) {
+      if (m_spectators.size()!=readNSpec) {
         m_spectators.clear();
         // TODO error message
         return 2;
@@ -153,7 +151,7 @@ int reader_wrapper::bookReader( TString xml_file_name) {
   for (auto var : m_spectators) {
     m_reader->AddSpectator(var.formula, &var.value);
   }
-  for (auto var : m_variables) {
+  for (auto& var : m_variables) {
     m_reader->AddVariable(var.formula, &var.value);
   }
   m_reader->BookMVA( m_methodName, xml_file_name );
