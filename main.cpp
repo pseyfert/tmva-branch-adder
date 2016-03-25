@@ -32,7 +32,7 @@ class reader_wrapper {
     TFile*                       m_infile;
     int                          getVariables(TString);
     int                          bookReader(TString) ;
-    int                          initFormulas();
+    int                          initFormulas(TString);
     int                          getTree(TString,TString);
     int                          GetEntry(Long64_t);
     virtual ~reader_wrapper() {
@@ -71,7 +71,7 @@ int reader_wrapper::GetEntry(Long64_t e) {
   return 0;
 }
 
-int reader_wrapper::initFormulas() {
+int reader_wrapper::initFormulas(TString targetbranch) {
   /// don't care about spectators here
   m_outtree = m_intree->CloneTree(-1,"fast");
   int buffer(0);
@@ -85,7 +85,7 @@ int reader_wrapper::initFormulas() {
   for (auto b : m_branches) {
     b->SetStatus(1);
   }
-  m_responseBranch = m_outtree->Branch(m_methodName.Data(),&m_response,(m_methodName + "/F").Data());
+  m_responseBranch = m_outtree->Branch(targetbranch.Data(),&m_response,(m_methodName + "/F").Data());
   // TODO error handling
   return 0;
 }
@@ -170,15 +170,22 @@ int main(int argc, char** argv) {
   TString xmlfile(argv[3]);
   TString rootfile(argv[1]);
   TString treename(argv[2]);
+
   reader_wrapper wrapper;
   std::cout << "getting variables" << std::endl;
   int errorcode = wrapper.getVariables(xmlfile);
+  TString targetbranch;
+  if (argc>4) {
+    targetbranch = argv[4];
+  } else {
+    targetbranch = wrapper.m_methodName;
+  }
   std::cout << "booking reader" << std::endl;
   errorcode |= wrapper.bookReader(xmlfile);
   std::cout << "getting tree" << std::endl;
   errorcode |= wrapper.getTree(rootfile,treename);
   std::cout << "initialise" << std::endl;
-  errorcode |= wrapper.initFormulas();
+  errorcode |= wrapper.initFormulas(targetbranch);
   std::cout << "looping" << std::endl;
   for (Long64_t e = 0 ; e < wrapper.m_outtree->GetEntries() ; ++e) {
     errorcode |= wrapper.GetEntry(e);
