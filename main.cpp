@@ -35,6 +35,12 @@ class reader_wrapper {
     int                          initFormulas();
     int                          getTree(TString,TString);
     int                          GetEntry(Long64_t);
+    virtual ~reader_wrapper() {
+      if (m_reader) delete m_reader;
+      for (auto& var : m_variables) {
+        if (var.ttreeformula) delete var.ttreeformula;
+      }
+    }
 };
 
 int reader_wrapper::getTree(TString rootfile, TString treename) {
@@ -110,7 +116,6 @@ int reader_wrapper::getVariables(TString xml_file_name) {
       UInt_t readNSpec;
       TMVA::gTools().ReadAttr( mynode , "NSpec", readNSpec);
       TMVA::VariableInfo readSpecInfo;
-      int specIdx = 0;
       void* ch = TMVA::gTools().GetChild(mynode);
       while (ch) {
         readSpecInfo.ReadFromXML(ch);
@@ -127,7 +132,6 @@ int reader_wrapper::getVariables(TString xml_file_name) {
       UInt_t readNVar;
       TMVA::gTools().ReadAttr( mynode , "NVar", readNVar);
       TMVA::VariableInfo readVarInfo;
-      int varIdx = 0;
       void* ch = TMVA::gTools().GetChild(mynode);
       while (ch) {
         readVarInfo.ReadFromXML(ch);
@@ -167,14 +171,22 @@ int main(int argc, char** argv) {
   TString rootfile(argv[1]);
   TString treename(argv[2]);
   reader_wrapper wrapper;
+  std::cout << "getting variables" << std::endl;
   int errorcode = wrapper.getVariables(xmlfile);
+  std::cout << "booking reader" << std::endl;
   errorcode |= wrapper.bookReader(xmlfile);
+  std::cout << "getting tree" << std::endl;
   errorcode |= wrapper.getTree(rootfile,treename);
+  std::cout << "initialise" << std::endl;
   errorcode |= wrapper.initFormulas();
+  std::cout << "looping" << std::endl;
   for (Long64_t e = 0 ; e < wrapper.m_outtree->GetEntries() ; ++e) {
     errorcode |= wrapper.GetEntry(e);
   }
+  std::cout << "writing ttree" << std::endl;
   wrapper.m_infile->WriteTObject(wrapper.m_outtree);
+  std::cout << "closing file" << std::endl;
+  wrapper.m_infile->Close();
 
   return errorcode;
 
