@@ -23,37 +23,62 @@ class reader_wrapper {
     std::vector<VariableWrapper> m_variables;
     std::vector<TTreeFormula*>   m_formulas;
     TTree*                       m_intree;
+    TTree*                       m_outtree;
     TMVA::Reader*                m_reader;
+    std::set<TBranch*>           m_branches;
+    Float_t                      m_response;
+    TBranch*                     m_responseBranch;
+    TFile*                       m_infile;
     int                          getVariables(TString);
     int                          bookReader(TString) ;
     int                          initFormulas();
     int                          getTree(TString,TString);
+    int                          GetEntry(Long64_t);
 };
 
 int reader_wrapper::getTree(TString rootfile, TString treename) {
-  TFile* infile = TFile::Open(rootfile,"read");
-  if (nullptr == infile || infile->IsZombie() || infile->GetNkeys() <= 0) {
+  m_infile = TFile::Open(rootfile,"update");
+  if (nullptr == m_infile || m_infile->IsZombie() || m_infile->GetNkeys() <= 0) {
     std::cerr << "File " << rootfile << " could not be opened properly." << std::endl;
     return 1;
   }
 
-  m_intree = dynamic_cast<TTree*>(infile->Get(treename.Data()));
+  m_intree = dynamic_cast<TTree*>(m_infile->Get(treename.Data()));
   if (nullptr == m_intree) {
     std::cerr << "Tree " << treename << " could not be opened properly." << std::endl;
     return 2;
   }
+  return 0;
 }
 
-// TODO book branches
-// TODO set branch statusses
-// TODO the actual loop
-// TODO and writing
+int reader_wrapper::GetEntry(Long64_t e) {
+  for (auto b: m_branches) {
+    b->GetEntry(e);
+  }
+  for (auto v : m_variables) {
+    v.value = v.ttreeformula->EvalInstance();
+  }
+  m_response = m_reader->EvaluateMVA(m_methodName.Data());
+  m_responseBranch->Fill();
+  return 0;
+}
 
 int reader_wrapper::initFormulas() {
+  m_outtree = m_intree->CloneTree(-1,"fast");
   int buffer(0);
   for (auto var : m_variables) {
-    var.ttreeformula = new TTreeFormula(Form("local_var_%d",buffer++),var.formula,m_intree);
+    var.ttreeformula = new TTreeFormula(Form("local_var_%d",buffer++),var.formula,m_outtree);
   }
+  m_outtree->SetBranchStatus("*",0);
+  for (auto var : m_variables) {
+    for (size_t v = 0 ; v < var.ttreeformula->GetNcodes() ; ++v) {
+      m_branches.insert(var.ttreeformula->GetLeaf(v)->GetBranch());
+    }
+  }
+  for (auto b : m_branches) {
+    b->SetStatus(1);
+  }
+  m_responseBranch = m_outtree->Branch(m_methodName.Data(),&m_response,(m_methodName + "/F").Data());
   // TODO error handling
   return 0;
 }
@@ -123,8 +148,14 @@ int main(int argc, char** argv) {
   TString treename(argv[2]);
   reader_wrapper wrapper;
   int errorcode = wrapper.getVariables(xmlfile);
-  wrapper.bookReader(xmlfile);
-  wrapper.getTree(rootfile,treename);
-  wrapper.initFormulas();
+  errorcode |= wrapper.bookReader(xmlfile);
+  errorcode |= wrapper.getTree(rootfile,treename);
+  errorcode |= wrapper.initFormulas();
+  for (Long64_t e = 0 ; e < wrapper.m_outtree->GetEntries() ; ++e) {
+    errorcode |= wrapper.GetEntry(e);
+  }
+  wrapper.m_infile->WriteTObject(wrapper.m_outtree);
+
+  return errorcode;
 
 }
