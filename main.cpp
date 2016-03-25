@@ -21,6 +21,7 @@ class reader_wrapper {
   public:
     TString                      m_methodName;
     std::vector<VariableWrapper> m_variables;
+    std::vector<VariableWrapper> m_spectators;
     std::vector<TTreeFormula*>   m_formulas;
     TTree*                       m_intree;
     TTree*                       m_outtree;
@@ -52,6 +53,7 @@ int reader_wrapper::getTree(TString rootfile, TString treename) {
 }
 
 int reader_wrapper::GetEntry(Long64_t e) {
+  /// don't care about spectators here
   for (auto b: m_branches) {
     b->GetEntry(e);
   }
@@ -64,6 +66,7 @@ int reader_wrapper::GetEntry(Long64_t e) {
 }
 
 int reader_wrapper::initFormulas() {
+  /// don't care about spectators here
   m_outtree = m_intree->CloneTree(-1,"fast");
   int buffer(0);
   for (auto var : m_variables) {
@@ -105,6 +108,23 @@ int reader_wrapper::getVariables(TString xml_file_name) {
 
   void* mynode = TMVA::gTools().GetChild(rootnode);
   while (mynode!=0) {
+    if (TString( TMVA::gTools().GetName(mynode)) == "Spectators") {
+      UInt_t readNSpec;
+      TMVA::gTools().ReadAttr( mynode , "NSpec", readNSpec);
+      TMVA::VariableInfo readSpecInfo;
+      int specIdx = 0;
+      void* ch = TMVA::gTools().GetChild(mynode);
+      while (ch) {
+        readSpecInfo.ReadFromXML(ch);
+        m_spectators.push_back(VariableWrapper(TString(readSpecInfo.GetExpression())));
+        ch = TMVA::gTools().GetNextChild(ch);
+      }
+      if (m_spectators.size()!=readNVar) {
+        m_spectators.clear();
+        // TODO error message
+        return 2;
+      }
+    }
     if (TString( TMVA::gTools().GetName(mynode)) == "Variables") {
       UInt_t readNVar;
       TMVA::gTools().ReadAttr( mynode , "NVar", readNVar);
@@ -121,16 +141,18 @@ int reader_wrapper::getVariables(TString xml_file_name) {
         // TODO error message
         return 2;
       }
-      return 0;
     }
     mynode = TMVA::gTools().GetNextChild(mynode);
   }
   // TODO error message
-  return 1;
+  return m_variables.empty()?1:0;
 }
 
 int reader_wrapper::bookReader( TString xml_file_name) {
   m_reader = new TMVA::Reader("!Color:Silent");
+  for (auto var : m_spectators) {
+    m_reader->AddSpectator(var.formula, &var.value);
+  }
   for (auto var : m_variables) {
     m_reader->AddVariable(var.formula, &var.value);
   }
