@@ -35,6 +35,17 @@ class reader_wrapper {
     int                          initFormulas(TString);
     int                          getTree(TString,TString);
     int                          GetEntry(Long64_t);
+    reader_wrapper() : m_methodName(""),
+                       m_variables(),
+                       m_spectators(),
+                       m_formulas(0,nullptr),
+                       m_intree(nullptr),
+                       m_outtree(nullptr),
+                       m_reader(nullptr),
+                       m_branches(),
+                       m_response(0.f),
+                       m_responseBranch(nullptr),
+                       m_infile(nullptr) {}
     virtual ~reader_wrapper() {
       if (m_reader) delete m_reader;
       for (auto& var : m_variables) {
@@ -85,9 +96,13 @@ int reader_wrapper::initFormulas(TString targetbranch) {
   for (auto b : m_branches) {
     b->SetStatus(1);
   }
-  m_responseBranch = m_outtree->Branch(targetbranch.Data(),&m_response,(m_methodName + "/F").Data());
-  // TODO error handling
-  return 0;
+  // check if output branch exists already
+  if (nullptr == m_outtree->GetBranch(targetbranch.Data())) {
+    m_responseBranch = m_outtree->Branch(targetbranch.Data(),&m_response,(m_methodName + "/F").Data());
+    return 0;
+  }
+  std::cout << "Output branch exists already. Aborting." << std::endl;
+  return 4;
 }
 
 int reader_wrapper::getVariables(TString xml_file_name) {
