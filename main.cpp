@@ -30,10 +30,11 @@ class reader_wrapper {
     Float_t                      m_response;
     TBranch*                     m_responseBranch;
     TFile*                       m_infile;
+    TFile*                       m_outfile;
     int                          getVariables(TString);
     int                          bookReader(TString) ;
     int                          initFormulas(TString);
-    int                          getTree(TString,TString);
+    int                          getTree(TString,TString,TString);
     int                          GetEntry(Long64_t);
     reader_wrapper() : m_methodName(""),
                        m_variables(),
@@ -45,7 +46,8 @@ class reader_wrapper {
                        m_branches(),
                        m_response(0.f),
                        m_responseBranch(nullptr),
-                       m_infile(nullptr) {}
+                       m_infile(nullptr),
+                       m_outfile(nullptr) {}
     virtual ~reader_wrapper() {
       if (m_reader) delete m_reader;
       for (auto& var : m_variables) {
@@ -54,10 +56,10 @@ class reader_wrapper {
     }
 };
 
-int reader_wrapper::getTree(TString rootfile, TString treename) {
-  m_infile = TFile::Open(rootfile,"update");
+int reader_wrapper::getTree(TString infile, TString treename, TString outfile) {
+  m_infile = TFile::Open(infile,"update");
   if (nullptr == m_infile || m_infile->IsZombie() || m_infile->GetNkeys() <= 0) {
-    std::cerr << "File " << rootfile << " could not be opened properly." << std::endl;
+    std::cerr << "File " << infile << " could not be opened properly." << std::endl;
     return 1;
   }
 
@@ -65,6 +67,11 @@ int reader_wrapper::getTree(TString rootfile, TString treename) {
   if (nullptr == m_intree) {
     std::cerr << "Tree " << treename << " could not be opened properly." << std::endl;
     return 2;
+  }
+  m_outfile = TFile::Open(outfile,"create");
+  if (nullptr == m_outfile || m_outfile->IsZombie()) {
+    std::cerr << "File " << outfile << " could not be opened properly." << std::endl;
+    return 3;
   }
   return 0;
 }
@@ -84,6 +91,7 @@ int reader_wrapper::GetEntry(Long64_t e) {
 
 int reader_wrapper::initFormulas(TString targetbranch) {
   /// don't care about spectators here
+  // TODO: does this tree get created in the outfile?
   m_outtree = m_intree->CloneTree(-1,"fast");
   int buffer(0);
   for (auto& var : m_variables) {
@@ -178,36 +186,42 @@ int reader_wrapper::bookReader( TString xml_file_name) {
 }
 
 int main(int argc, char** argv) {
-  if ((5!=argc&&4!=argc) || 0==strcmp("-h",argv[1])) {
-    std::cout << "USAGE: " << argv[0] << " <root file> <tree name> <xml file> [<target branch>]" << std::endl;
+  if ((5!=argc&&6!=argc) || 0==strcmp("-h",argv[1])) {
+    std::cout << "USAGE: " << argv[0] << " <root file> <tree name> <xml file> <output file> [<target branch>]" << std::endl;
     return 1;
   }
   TString xmlfile(argv[3]);
-  TString rootfile(argv[1]);
+  TString infile(argv[1]);
+  TString outfile(argv[4]);
   TString treename(argv[2]);
 
   reader_wrapper wrapper;
   std::cout << "getting variables" << std::endl;
   int errorcode = wrapper.getVariables(xmlfile);
   TString targetbranch;
-  if (argc>4) {
-    targetbranch = argv[4];
+  if (argc>5) {
+    targetbranch = argv[5];
   } else {
     targetbranch = wrapper.m_methodName;
   }
   std::cout << "booking reader" << std::endl;
   errorcode |= wrapper.bookReader(xmlfile);
+  if (errorcode) return errorcode;
   std::cout << "getting tree" << std::endl;
-  errorcode |= wrapper.getTree(rootfile,treename);
+  errorcode |= wrapper.getTree(infile,treename,outfile);
+  if (errorcode) return errorcode;
   std::cout << "initialise" << std::endl;
   errorcode |= wrapper.initFormulas(targetbranch);
+  if (errorcode) return errorcode;
   std::cout << "looping" << std::endl;
   for (Long64_t e = 0 ; e < wrapper.m_outtree->GetEntries() ; ++e) {
     errorcode |= wrapper.GetEntry(e);
+    if (errorcode) return errorcode;
   }
   std::cout << "writing ttree" << std::endl;
-  wrapper.m_infile->WriteTObject(wrapper.m_outtree);
+  wrapper.m_outfile->WriteTObject(wrapper.m_outtree);
   std::cout << "closing file" << std::endl;
+  wrapper.m_outfile->Close();
   wrapper.m_infile->Close();
 
   return errorcode;
