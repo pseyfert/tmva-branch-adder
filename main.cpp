@@ -179,7 +179,7 @@ int reader_wrapper::bookReader( TString xml_file_name) {
 
 int main(int argc, char** argv) {
   if ((5!=argc&&4!=argc) || 0==strcmp("-h",argv[1])) {
-    std::cout << "USAGE: ./" << argv[0] << " <root file> <tree name> <xml file> [<target branch>]" << std::endl;
+    std::cout << "USAGE: " << argv[0] << " <root file> <tree name> <xml file> [<target branch>]" << std::endl;
     return 1;
   }
   TString xmlfile(argv[3]);
