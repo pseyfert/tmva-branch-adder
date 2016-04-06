@@ -106,7 +106,7 @@ int reader_wrapper::initFormulas(TString targetbranch) {
   }
   // check if output branch exists already
   if (nullptr == m_outtree->GetBranch(targetbranch.Data())) {
-    m_responseBranch = m_outtree->Branch(targetbranch.Data(),&m_response,(m_methodName + "/F").Data());
+    m_responseBranch = m_outtree->Branch(targetbranch.Data(),&m_response,(targetbranch + "/F").Data());
     return 0;
   }
   std::cout << "Output branch exists already. Aborting." << std::endl;
