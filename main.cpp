@@ -92,6 +92,7 @@ int reader_wrapper::GetEntry(Long64_t e) {
 int reader_wrapper::initFormulas(TString targetbranch) {
   /// don't care about spectators here
   // TODO: does this tree get created in the outfile?
+  m_outtree->SetBranchStatus("*",1);
   m_outtree = m_intree->CloneTree(-1,"fast");
   int buffer(0);
   for (auto& var : m_variables) {
@@ -218,6 +219,7 @@ int main(int argc, char** argv) {
     errorcode |= wrapper.GetEntry(e);
     if (errorcode) return errorcode;
   }
+  wrapper.m_outtree->SetBranchStatus("*",1);
   std::cout << "writing ttree" << std::endl;
   wrapper.m_outfile->WriteTObject(wrapper.m_outtree);
   std::cout << "closing file" << std::endl;
