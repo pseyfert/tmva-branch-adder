@@ -19,6 +19,63 @@ class VariableWrapper {
 
 class reader_wrapper {
   public:
+    //// new interface
+    int                          SetTargetFile(TFile* file) {
+      m_outfile = file;
+      return 0;
+    }
+    int                          SetTargetBranch(TString);
+    int                          SetXMLFile(TString filename) {
+      m_xmlfilename = filename;
+      /// TODO: check if file can be parsed
+      return 0;
+    }
+    int                          SetTree(TTree* tree) {
+      /// if it's a nullptr will be checked later
+      m_intree = tree;
+      return 0;
+    }
+    int                          check_all_initialised() {
+      int errorcode = 0;
+      if (nullptr==m_intree) {
+        std::cerr << "no TTree to process provided" << std::endl;
+        errorcode |= 1 << 0;
+      }
+      if (m_xmlfilename == TString("")) {
+        std::cerr << "no XML file with classifier provided" << std::endl;
+        errorcode |= 1 << 1;
+      }
+      return errorcode;
+    }
+    int                          Process() {
+      int errorcode = 0;
+      errorcode |= check_all_initialised();
+      if (errorcode) return errorcode;
+      errorcode |= getVariables(m_xmlfilename);
+      if (m_targetbranchname == TString("")) {
+        m_targetbranchname = m_methodName;
+      }
+      if (errorcode) return errorcode;
+      errorcode |= bookReader(m_xmlfilename);
+      if (errorcode) return errorcode;
+      errorcode |= initFormulas(m_targetbranchname);
+      if (errorcode) return errorcode;
+      Long64_t entries = m_outtree->GetEntries();
+      for (Long64_t e = 0 ; e < entries ; ++e) {
+        errorcode |= GetEntry(e);
+        if (errorcode) return errorcode;
+      }
+      m_outtree->SetBranchStatus("*",1);
+      if (nullptr!=m_outfile) {
+        /// maybe the tree is supposed to be kept in RAM and not written to disk?
+        m_outfile->WriteTObject(m_outtree);
+      }
+    }
+  protected:
+    TString                      m_xmlfilename;
+    TString                      m_targetbranchname;
+    //// old interface
+  public:
     TString                      m_methodName;
     std::vector<VariableWrapper> m_variables;
     std::vector<VariableWrapper> m_spectators;
@@ -36,7 +93,10 @@ class reader_wrapper {
     int                          initFormulas(TString);
     int                          getTree(TString,TString,TString);
     int                          GetEntry(Long64_t);
-    reader_wrapper() : m_methodName(""),
+    reader_wrapper() :
+                       m_xmlfilename(""),
+                       m_targetbranchname(""),
+                       m_methodName(""),
                        m_variables(),
                        m_spectators(),
                        m_formulas(0,nullptr),
@@ -93,7 +153,13 @@ int reader_wrapper::initFormulas(TString targetbranch) {
   /// don't care about spectators here
   // TODO: does this tree get created in the outfile?
   m_intree->SetBranchStatus("*",1);
+  TDirectory* cwd = gDirectory;
+  if (nullptr!=m_outfile) {
+    m_outfile->cd();
+  }
   m_outtree = m_intree->CloneTree(-1,"fast");
+  m_outtree->SetDirectory(m_outfile);
+  cwd->cd();
   int buffer(0);
   for (auto& var : m_variables) {
     var.ttreeformula = new TTreeFormula(Form("local_var_%d",buffer++),var.formula,m_outtree);
