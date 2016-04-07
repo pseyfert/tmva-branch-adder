@@ -92,7 +92,7 @@ int reader_wrapper::GetEntry(Long64_t e) {
 int reader_wrapper::initFormulas(TString targetbranch) {
   /// don't care about spectators here
   // TODO: does this tree get created in the outfile?
-  m_outtree->SetBranchStatus("*",1);
+  m_intree->SetBranchStatus("*",1);
   m_outtree = m_intree->CloneTree(-1,"fast");
   int buffer(0);
   for (auto& var : m_variables) {
