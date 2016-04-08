@@ -1,13 +1,15 @@
 #include <stdio.h>
 #include <string.h>
 #include <iostream>
-#include <set>
+#include <unordered_set>
+#include <regex>
 #include "TString.h"
 #include "TTree.h"
 #include "TFile.h"
 #include "TMVA/Tools.h"
 #include "TMVA/Reader.h"
 #include "TTreeFormula.h"
+#include "blacklist.h"
 
 class VariableWrapper {
   public:
@@ -26,13 +28,21 @@ class reader_wrapper {
     }
     int                          SetTargetBranch(TString name) {
       /// TODO check if name is valid as in none of +-/*()#[]<><space><leading digit>  --- more?
-      m_targetbranchname = name;
-      return 0;
+      // http://stackoverflow.com/questions/12993187/regular-expression-to-recognize-variable-declarations-in-c
+      // https://root.cern.ch/phpBB3/viewtopic.php?f=3&t=21407&p=93337&sid=5f32a5ca9aa01003e4dec96a2f92a2e0#p93337
+      if (std::regex_match(name.Data(),std::regex("([a-zA-Z_][a-zA-Z0-9_]*)"))) {
+        if (blacklisted(name)) {
+          return 9;
+        }
+        m_targetbranchname = name;
+        return 0;
+      }
+      return 8;
     }
     int                          SetXMLFile(TString filename) {
       m_xmlfilename = filename;
-      /// TODO: check if file can be parsed
       return 0;
+      /// TODO: check if file can be parsed
     }
     int                          SetTree(TTree* tree) {
       /// if it's a nullptr will be checked later
@@ -89,7 +99,7 @@ class reader_wrapper {
     TTree*                       m_intree;
     TTree*                       m_outtree;
     TMVA::Reader*                m_reader;
-    std::set<TBranch*>           m_branches;
+    std::unordered_set<TBranch*> m_branches;
     Float_t                      m_response;
     TBranch*                     m_responseBranch;
     TFile*                       m_infile;

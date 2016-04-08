@@ -13,11 +13,12 @@ make
 ## Acknowledgements
 
 Thanks for input from
-ttekampe
-@ibab
-burney
-@pcanal
-fkruse
+ * ttekampe
+ * @ibab
+ * burney
+ * @pcanal
+ * fkruse
+ * sur5r
 
 # TODO
 
