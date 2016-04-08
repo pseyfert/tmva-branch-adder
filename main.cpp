@@ -24,7 +24,11 @@ class reader_wrapper {
       m_outfile = file;
       return 0;
     }
-    int                          SetTargetBranch(TString);
+    int                          SetTargetBranch(TString name) {
+      /// TODO check if name is valid as in none of +-/*()#[]<><space><leading digit>  --- more?
+      m_targetbranchname = name;
+      return 0;
+    }
     int                          SetXMLFile(TString filename) {
       m_xmlfilename = filename;
       /// TODO: check if file can be parsed
@@ -34,18 +38,6 @@ class reader_wrapper {
       /// if it's a nullptr will be checked later
       m_intree = tree;
       return 0;
-    }
-    int                          check_all_initialised() {
-      int errorcode = 0;
-      if (nullptr==m_intree) {
-        std::cerr << "no TTree to process provided" << std::endl;
-        errorcode |= 1 << 0;
-      }
-      if (m_xmlfilename == TString("")) {
-        std::cerr << "no XML file with classifier provided" << std::endl;
-        errorcode |= 1 << 1;
-      }
-      return errorcode;
     }
     int                          Process() {
       int errorcode = 0;
@@ -69,11 +61,25 @@ class reader_wrapper {
       if (nullptr!=m_outfile) {
         /// maybe the tree is supposed to be kept in RAM and not written to disk?
         m_outfile->WriteTObject(m_outtree);
+        /// TODO check return value
       }
+      return errorcode;
     }
   protected:
     TString                      m_xmlfilename;
     TString                      m_targetbranchname;
+    int                          check_all_initialised() {
+      int errorcode = 0;
+      if (nullptr==m_intree) {
+        std::cerr << "no TTree to process provided" << std::endl;
+        errorcode |= 1 << 0;
+      }
+      if (m_xmlfilename == TString("")) {
+        std::cerr << "no XML file with classifier provided" << std::endl;
+        errorcode |= 1 << 1;
+      }
+      return errorcode;
+    }
     //// old interface
   public:
     TString                      m_methodName;
@@ -262,36 +268,23 @@ int main(int argc, char** argv) {
   TString outfile(argv[4]);
   TString treename(argv[2]);
 
+  int errorcode = 0;
   reader_wrapper wrapper;
-  std::cout << "getting variables" << std::endl;
-  int errorcode = wrapper.getVariables(xmlfile);
-  TString targetbranch;
-  if (argc>5) {
-    targetbranch = argv[5];
-  } else {
-    targetbranch = wrapper.m_methodName;
-  }
-  std::cout << "booking reader" << std::endl;
-  errorcode |= wrapper.bookReader(xmlfile);
+  TFile* of = TFile::Open(outfile,"create");
+  errorcode |= wrapper.SetTargetFile(of);
   if (errorcode) return errorcode;
-  std::cout << "getting tree" << std::endl;
-  errorcode |= wrapper.getTree(infile,treename,outfile);
+  if (6==argc) wrapper.SetTargetBranch(argv[5]);
+  errorcode |= wrapper.SetXMLFile(xmlfile);
   if (errorcode) return errorcode;
-  std::cout << "initialise" << std::endl;
-  errorcode |= wrapper.initFormulas(targetbranch);
-  if (errorcode) return errorcode;
-  std::cout << "looping" << std::endl;
-  for (Long64_t e = 0 ; e < wrapper.m_outtree->GetEntries() ; ++e) {
-    errorcode |= wrapper.GetEntry(e);
-    if (errorcode) return errorcode;
-  }
-  wrapper.m_outtree->SetBranchStatus("*",1);
-  std::cout << "writing ttree" << std::endl;
-  wrapper.m_outfile->WriteTObject(wrapper.m_outtree);
-  std::cout << "closing file" << std::endl;
-  wrapper.m_outfile->Close();
-  wrapper.m_infile->Close();
 
+  TFile* if_ = TFile::Open(infile,"read");
+  TTree* intree = (TTree*)if_->Get(treename);
+  errorcode |= wrapper.SetTree(intree);
+  if (errorcode) return errorcode;
+
+
+  errorcode |= wrapper.Process();
+  if (errorcode) return errorcode;
+  of->Close();
   return errorcode;
-
 }
