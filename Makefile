@@ -8,6 +8,8 @@ all: main
 
 main: main.o
 
+main.o: blacklist.h main.cpp
+
 clean:
 	rm -f *.o
 
