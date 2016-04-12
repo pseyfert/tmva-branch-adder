@@ -7,7 +7,11 @@ Not heavily debugged, but feel free to try it.
 
 ```
 make
-./main rootfile-with-tree.root name-of-tree path-to.xml
+./main rootfile-with-tree.root name-of-tree path-to.xml output-rootfile.root
+```
+or specify the output branch name
+```
+./main rootfile-with-tree.root name-of-tree path-to.xml output-rootfile.root response-branchname
 ```
 
 ## Acknowledgements
