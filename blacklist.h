@@ -17,7 +17,7 @@ bool blacklisted(TString checkme) {
   // mathematical function names
   if (checkme.BeginsWith("TMath")) return true;
 
-  static std::unordered_set<TString> blacklist = {
+  static const std::unordered_set<TString> blacklist = {
     "cos" "sin", "tan", "exp", "log", "acos", "asin", "atan", "cosh", "sinh",
     "tanh", "acosh", "asinh", "atanh", "sq", "log10", "abs", "sign", "sqrt",
     "rndm", "min", "max", "atan2", "fmod", "pi", "int", "double", "char",

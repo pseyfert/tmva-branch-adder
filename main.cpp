@@ -283,7 +283,8 @@ int main(int argc, char** argv) {
   TFile* of = TFile::Open(outfile,"create");
   errorcode |= wrapper.SetTargetFile(of);
   if (errorcode) return errorcode;
-  if (6==argc) wrapper.SetTargetBranch(argv[5]);
+  if (6==argc) errorcode |= wrapper.SetTargetBranch(argv[5]);
+  if (errorcode) return errorcode;
   errorcode |= wrapper.SetXMLFile(xmlfile);
   if (errorcode) return errorcode;
 
