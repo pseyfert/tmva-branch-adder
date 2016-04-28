@@ -44,6 +44,10 @@ class reader_wrapper {
       return 0;
       /// TODO: check if file can be parsed
     }
+    int                          SetTree(TObject* tree) {
+      /// work around my inabilities to use pyroot
+      return SetTree((TTree*)tree);
+    }
     int                          SetTree(TTree* tree) {
       /// if it's a nullptr will be checked later
       m_intree = tree;
