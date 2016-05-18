@@ -1,7 +1,7 @@
 #include <stdio.h>
+#include <set>
 #include <string.h>
 #include <iostream>
-#include <unordered_set>
 #include <regex>
 #include "TString.h"
 #include "TTree.h"
@@ -32,11 +32,11 @@ int reader_wrapper::getTree(TString infile, TString treename, TString outfile) {
 
 int reader_wrapper::GetEntry(Long64_t e) {
   /// don't care about spectators here
-  for (auto b: m_branches) {
-    b->GetEntry(e);
+  for (size_t b = 0 ; b< m_branches.size() ; ++b) {
+    m_branches[b]->GetEntry(e);
   }
-  for (auto& v : m_variables) {
-    v.value = v.ttreeformula->EvalInstance();
+  for (size_t v = 0;  v< m_variables.size(); ++v ) {
+    m_variables[v].value = m_variables[v].ttreeformula->EvalInstance();
   }
   m_response = m_reader->EvaluateMVA(m_methodName.Data());
   m_responseBranch->Fill();
@@ -55,15 +55,15 @@ int reader_wrapper::initFormulas(TString targetbranch) {
   m_outtree->SetDirectory(m_outfile);
   cwd->cd();
   int buffer(0);
-  for (auto& var : m_variables) {
-    var.ttreeformula = new TTreeFormula(Form("local_var_%d",buffer++),var.formula,m_outtree);
-    for (size_t v = 0 ; v < var.ttreeformula->GetNcodes() ; ++v) {
-      m_branches.insert(var.ttreeformula->GetLeaf(v)->GetBranch());
+  for (size_t var = 0; var < m_variables.size(); var++) {
+    m_variables[var].ttreeformula = new TTreeFormula(Form("local_var_%d",buffer++),m_variables[var].formula,m_outtree);
+    for (size_t v = 0 ; v < m_variables[var].ttreeformula->GetNcodes() ; ++v) {
+      m_branches.push_back(m_variables[var].ttreeformula->GetLeaf(v)->GetBranch());
     }
   }
   m_outtree->SetBranchStatus("*",0);
-  for (auto b : m_branches) {
-    b->SetStatus(1);
+  for (size_t b =0 ; b<m_branches.size() ; ++b) {
+    m_branches[b]->SetStatus(1);
   }
   // check if output branch exists already
   if (nullptr == m_outtree->GetBranch(targetbranch.Data())) {
@@ -136,11 +136,11 @@ int reader_wrapper::getVariables(TString xml_file_name) {
 
 int reader_wrapper::bookReader( TString xml_file_name) {
   m_reader = new TMVA::Reader("!Color:Silent");
-  for (auto var : m_spectators) {
-    m_reader->AddSpectator(var.formula, &var.value);
+  for (size_t var =0 ; var<m_spectators.size() ; ++var) {
+    m_reader->AddSpectator(m_spectators[var].formula, &(m_spectators[var].value));
   }
-  for (auto& var : m_variables) {
-    m_reader->AddVariable(var.formula, &var.value);
+  for (size_t var =0 ; var<m_variables.size(); var++) {
+    m_reader->AddVariable(m_variables[var].formula, &(m_variables[var].value));
   }
   m_reader->BookMVA( m_methodName, xml_file_name );
   return 0;

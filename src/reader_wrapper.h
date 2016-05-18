@@ -1,14 +1,13 @@
 #pragma once
 #include <stdio.h>
+#include <set>
 #include <string.h>
-#include <unordered_set>
 #include <regex>
 #include "TString.h"
 #include "TTree.h"
 #include "TFile.h"
 #include "TMVA/Reader.h"
 #include "TTreeFormula.h"
-#include "blacklist.h"
 
 class VariableWrapper {
   public:
@@ -30,14 +29,8 @@ class reader_wrapper {
       /// TODO check if name is valid as in none of +-/*()#[]<><space><leading digit>  --- more?
       // http://stackoverflow.com/questions/12993187/regular-expression-to-recognize-variable-declarations-in-c
       // https://root.cern.ch/phpBB3/viewtopic.php?f=3&t=21407&p=93337&sid=5f32a5ca9aa01003e4dec96a2f92a2e0#p93337
-      if (std::regex_match(name.Data(),std::regex("([a-zA-Z_][a-zA-Z0-9_]*)"))) {
-        if (blacklisted(name)) {
-          return 9;
-        }
         m_targetbranchname = name;
         return 0;
-      }
-      return 8;
     }
     int                          SetXMLFile(TString filename) {
       m_xmlfilename = filename;
@@ -103,7 +96,7 @@ class reader_wrapper {
     TTree*                       m_intree;
     TTree*                       m_outtree;
     TMVA::Reader*                m_reader;
-    std::unordered_set<TBranch*> m_branches;
+    std::vector<TBranch*>        m_branches;
     Float_t                      m_response;
     TBranch*                     m_responseBranch;
     TFile*                       m_infile;
@@ -119,7 +112,6 @@ class reader_wrapper {
                        m_methodName(""),
                        m_variables(),
                        m_spectators(),
-                       m_formulas(0,nullptr),
                        m_intree(nullptr),
                        m_outtree(nullptr),
                        m_reader(nullptr),
@@ -130,8 +122,8 @@ class reader_wrapper {
                        m_outfile(nullptr) {}
     virtual ~reader_wrapper() {
       if (m_reader) delete m_reader;
-      for (auto& var : m_variables) {
-        if (var.ttreeformula) delete var.ttreeformula;
+      for (size_t var = 0; var< m_variables.size(); var++) {
+        if (m_variables[var].ttreeformula) delete m_variables[var].ttreeformula;
       }
     }
 };
