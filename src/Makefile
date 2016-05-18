@@ -15,6 +15,9 @@ blacklist.o: blacklist.h blacklist.cpp
 main.o: reader_wrapper.h blacklist.h main.cpp
 
 clean:
-	rm -f *.o
+	rm -f *.o main
+
+clingclean:
+	rm -f *_cpp.so *_cpp.d *_cpp_ACLiC_dict_rdict.pcm
 
 .PHONY: clean

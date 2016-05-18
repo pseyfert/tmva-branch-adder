@@ -3,3 +3,4 @@ all:
 
 clean:
 	rm -f *.pyc
+	$(MAKE) -C ../src clingclean

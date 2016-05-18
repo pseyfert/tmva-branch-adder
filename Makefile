@@ -8,5 +8,6 @@ py: cplusplus
 
 clean:
 	$(MAKE) -C src clean
+	$(MAKE) -C module clean
 
 .PHONY: clean cplusplus py
