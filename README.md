@@ -29,3 +29,8 @@ Thanks for input from
 
  * provide pyroot access
  * provide c++ / cling access
+
+# legacy ROOT/GCC
+
+We encountered a root 5.34 / gcc 4.6 setup where this tool did not build (requires c++11).
+There's now a separate branch (no-c++11) with compatibility on a minimum effort basis.
