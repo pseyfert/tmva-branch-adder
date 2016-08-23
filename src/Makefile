@@ -1,5 +1,5 @@
-CPPFLAGS+=$(shell root-config --cflags) -march=native -O2 -g -Wextra -Wall -Wshadow -Wpedantic -std=c++11
-LDFLAGS+=$(shell root-config --libs) -lMinuit -lFoam -lMathMore -lTMVA -lTreePlayer -lXMLIO -lstdc++ -m64 -g -march=native
+CPPFLAGS+=$(shell root-config --cflags) -O2 -g -Wextra -Wall -Wshadow -Wpedantic -std=c++11
+LDFLAGS+=$(shell root-config --libs) -lMinuit -lFoam -lMathMore -lTMVA -lTreePlayer -lXMLIO -lstdc++ -m64 -g
 CPP=c++
 CXX=c++
 CC=c++
