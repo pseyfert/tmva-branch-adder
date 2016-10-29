@@ -11,7 +11,7 @@
 #include "reader_wrapper.h"
 
 int reader_wrapper::getTree(TString infile, TString treename, TString outfile) {
-  m_infile = TFile::Open(infile,"update");
+  m_infile = TFile::Open(infile,"read");
   if (nullptr == m_infile || m_infile->IsZombie() || m_infile->GetNkeys() <= 0) {
     std::cerr << "File " << infile << " could not be opened properly." << std::endl;
     return 1;

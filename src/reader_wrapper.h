@@ -53,6 +53,11 @@ class reader_wrapper {
       m_intree = tree;
       return 0;
     }
+    void                         Close() {
+      if (nullptr!=m_outfile) {
+        m_outfile->Close();
+      }
+    }
     int                          Process() {
       int errorcode = 0;
       errorcode |= check_all_initialised();
