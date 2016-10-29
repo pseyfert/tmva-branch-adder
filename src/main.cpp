@@ -18,22 +18,15 @@ int main(int argc, char** argv) {
 
   int errorcode = 0;
   reader_wrapper wrapper;
-  TFile* of = TFile::Open(outfile,"create");
-  errorcode |= wrapper.SetTargetFile(of);
+  errorcode |= wrapper.getTree(infile,treename,outfile);
   if (errorcode) return errorcode;
   if (6==argc) errorcode |= wrapper.SetTargetBranch(argv[5]);
   if (errorcode) return errorcode;
   errorcode |= wrapper.SetXMLFile(xmlfile);
   if (errorcode) return errorcode;
 
-  TFile* if_ = TFile::Open(infile,"read");
-  TTree* intree = (TTree*)if_->Get(treename);
-  errorcode |= wrapper.SetTree(intree);
-  if (errorcode) return errorcode;
-
-
   errorcode |= wrapper.Process();
   if (errorcode) return errorcode;
-  of->Close();
+  wrapper.Close();
   return errorcode;
 }
