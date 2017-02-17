@@ -1,0 +1,8 @@
+before_script:
+  # from https://root.cern.ch/build-prerequisites
+  - yum install -y glibc-headers glibc-devel git gsl-devel freetype-devel libSM libX11-devel libXext-devel make gcc-c++ gcc binutils libXpm-devel libXft-devel 
+  - source /cvmfs/sft.cern.ch/lcg/views/LCG_latest/x86_64-slc6-gcc49-opt/setup.sh
+
+build:
+  script:
+    - make install
