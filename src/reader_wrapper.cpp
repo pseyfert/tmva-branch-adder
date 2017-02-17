@@ -6,11 +6,13 @@
 #include "TString.h"
 #include "TTree.h"
 #include "TFile.h"
+#include "TDirectory.h"
 #include "TMVA/Tools.h"
 #include "TMVA/Reader.h"
 #include "reader_wrapper.h"
 
 int reader_wrapper::getTree(TString infile, TString treename, TString outfile) {
+  TDirectory* cwd = gDirectory;
   m_infile = TFile::Open(infile,"read");
   if (nullptr == m_infile || m_infile->IsZombie() || m_infile->GetNkeys() <= 0) {
     std::cerr << "File " << infile << " could not be opened properly." << std::endl;
@@ -22,11 +24,28 @@ int reader_wrapper::getTree(TString infile, TString treename, TString outfile) {
     std::cerr << "Tree " << treename << " could not be opened properly." << std::endl;
     return 2;
   }
+  TDirectory* dir = m_intree->GetDirectory();
+  std::vector<TString> dirnamestack;
+  std::vector<TString> dirtitlestack;
+  while (0!=strcmp(dir->ClassName(),"TFile")) {
+    dirnamestack.push_back(dir->GetName());
+    dirtitlestack.push_back(dir->GetTitle());
+    dir = dir->GetMotherDir();
+  }
   m_outfile = TFile::Open(outfile,"create");
   if (nullptr == m_outfile || m_outfile->IsZombie()) {
     std::cerr << "File " << outfile << " could not be opened properly." << std::endl;
     return 3;
   }
+  m_outfile->cd();
+  while (!dirnamestack.empty()) {
+    m_outfile = new TDirectoryFile(dirnamestack.back().Data(),dirtitlestack.back().Data());
+    dirnamestack.pop_back();
+    dirtitlestack.pop_back();
+    m_outfile->Write();
+    m_outfile->cd();
+  }
+  cwd->cd();
   return 0;
 }
 

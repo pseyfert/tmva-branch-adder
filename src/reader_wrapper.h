@@ -6,6 +6,7 @@
 #include "TString.h"
 #include "TTree.h"
 #include "TFile.h"
+#include "TDirectoryFile.h"
 #include "TMVA/Reader.h"
 #include "TTreeFormula.h"
 #include "blacklist.h"
@@ -22,7 +23,7 @@ class VariableWrapper {
 class reader_wrapper {
   public:
     //// new interface
-    int                          SetTargetFile(TFile* file) {
+    int                          SetTargetFile(TDirectoryFile* file) {
       m_outfile = file;
       return 0;
     }
@@ -55,7 +56,7 @@ class reader_wrapper {
     }
     void                         Close() {
       if (nullptr!=m_outfile) {
-        m_outfile->Close();
+        m_outfile->GetFile()->Close();
       }
     }
     int                          Process() {
@@ -112,7 +113,7 @@ class reader_wrapper {
     Float_t                      m_response;
     TBranch*                     m_responseBranch;
     TFile*                       m_infile;
-    TFile*                       m_outfile;
+    TDirectoryFile*              m_outfile;
     int                          getVariables(TString);
     int                          bookReader(TString) ;
     int                          initFormulas(TString);
