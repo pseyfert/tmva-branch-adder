@@ -4,7 +4,7 @@ CPP=c++
 CXX=c++
 CC=c++
 
-all: main
+all: main libBranchAdder.so
 
 main: main.o reader_wrapper.o blacklist.o
 
