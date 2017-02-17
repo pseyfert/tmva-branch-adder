@@ -1,4 +1,4 @@
-CPPFLAGS+=$(shell root-config --cflags) -O2 -g -Wextra -Wall -Wshadow -Wpedantic -std=c++11 -fPIC
+CPPFLAGS+=$(shell root-config --cflags) -O2 -g -Wextra -Wall -Wshadow -Wpedantic -fPIC
 LDFLAGS+=$(shell root-config --libs) -lMinuit -lFoam -lMathMore -lTMVA -lTreePlayer -lXMLIO -lstdc++ -m64 -g
 CPP=c++
 CXX=c++

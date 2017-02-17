@@ -31,7 +31,7 @@ rootsys = os.environ['ROOTSYS']
 flags = [
 '-Wall',
 '-Werror',
-'-std=c++11',
+'-std=c++14',
 '-I'+rootsys+'/include',
 '-x',
 'c++',
