@@ -32,20 +32,29 @@ int reader_wrapper::getTree(TString infile, TString treename, TString outfile) {
     dirtitlestack.push_back(dir->GetTitle());
     dir = dir->GetMotherDir();
   }
-  m_outfile = TFile::Open(outfile,"create");
-  if (nullptr == m_outfile || m_outfile->IsZombie()) {
+  TDirectoryFile* outdir = TFile::Open(outfile,"create");
+  if (nullptr == outdir || outdir->IsZombie()) {
     std::cerr << "File " << outfile << " could not be opened properly." << std::endl;
     return 3;
   }
-  m_outfile->cd();
+  outdir->cd();
   while (!dirnamestack.empty()) {
-    m_outfile = new TDirectoryFile(dirnamestack.back().Data(),dirtitlestack.back().Data());
+    outdir = new TDirectoryFile(dirnamestack.back().Data(),dirtitlestack.back().Data());
     dirnamestack.pop_back();
     dirtitlestack.pop_back();
-    m_outfile->Write();
-    m_outfile->cd();
+    outdir->Write();
+    outdir->cd();
   }
+  SetTargetFile(outdir);
   cwd->cd();
+  return 0;
+}
+
+int reader_wrapper::Evaluate() {
+  for (auto& v : m_variables) {
+    v.value = v.ttreeformula->EvalInstance();
+  }
+  m_response = m_reader->EvaluateMVA(m_methodName.Data());
   return 0;
 }
 
@@ -54,14 +63,10 @@ int reader_wrapper::GetEntry(Long64_t e) {
   for (auto b: m_branches) {
     b->GetEntry(e);
   }
-  for (auto& v : m_variables) {
-    v.value = v.ttreeformula->EvalInstance();
-  }
-  m_response = m_reader->EvaluateMVA(m_methodName.Data());
-  return 0;
+  return Evaluate();
 }
 
-int reader_wrapper::initFormulas(TString targetbranch) {
+int reader_wrapper::createTree() {
   /// don't care about spectators here
   // TODO: does this tree get created in the outfile?
   m_intree->SetBranchStatus("*",1);
@@ -72,6 +77,18 @@ int reader_wrapper::initFormulas(TString targetbranch) {
   m_outtree = m_intree->CloneTree(-1,"fast");
   m_outtree->SetDirectory(m_outfile);
   cwd->cd();
+  return 0;
+}
+
+int reader_wrapper::activateBranches() {
+  for (auto b : m_branches) {
+    b->SetStatus(1);
+  }
+  m_responseBranch->SetStatus(1);
+  return 0;
+}
+
+int reader_wrapper::initFormulas(TString targetbranch) {
   int buffer(0);
   for (auto& var : m_variables) {
     var.ttreeformula = new TTreeFormula(Form("local_var_%d",buffer++),var.formula,m_outtree);
@@ -79,10 +96,7 @@ int reader_wrapper::initFormulas(TString targetbranch) {
       m_branches.insert(var.ttreeformula->GetLeaf(v)->GetBranch());
     }
   }
-  m_outtree->SetBranchStatus("*",0);
-  for (auto b : m_branches) {
-    b->SetStatus(1);
-  }
+
   // check if output branch exists already
   if (nullptr == m_outtree->GetBranch(targetbranch.Data())) {
     m_responseBranch = m_outtree->Branch(targetbranch.Data(),&m_response,(targetbranch + "/F").Data());
