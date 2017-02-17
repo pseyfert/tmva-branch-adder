@@ -74,6 +74,8 @@ class reader_wrapper {
       Long64_t entries = m_outtree->GetEntries();
       for (Long64_t e = 0 ; e < entries ; ++e) {
         errorcode |= GetEntry(e);
+        if (m_responseBranch->Fill() > 0) errorcode |= 0;
+        else                              errorcode |= 3;
         if (errorcode) return errorcode;
       }
       m_outtree->SetBranchStatus("*",1);

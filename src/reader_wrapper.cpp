@@ -39,8 +39,7 @@ int reader_wrapper::GetEntry(Long64_t e) {
     v.value = v.ttreeformula->EvalInstance();
   }
   m_response = m_reader->EvaluateMVA(m_methodName.Data());
-  if (m_responseBranch->Fill() > 0) return 0;
-  else return 3;
+  return 0;
 }
 
 int reader_wrapper::initFormulas(TString targetbranch) {
