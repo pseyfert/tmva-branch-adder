@@ -6,6 +6,7 @@
 #include "TString.h"
 #include "TTree.h"
 #include "TFile.h"
+#include "TDirectoryFile.h"
 #include "TMVA/Reader.h"
 #include "TTreeFormula.h"
 #include "blacklist.h"
@@ -22,7 +23,7 @@ class VariableWrapper {
 class reader_wrapper {
   public:
     //// new interface
-    int                          SetTargetFile(TFile* file) {
+    int                          SetTargetFile(TDirectoryFile* file) {
       m_outfile = file;
       return 0;
     }
@@ -55,7 +56,7 @@ class reader_wrapper {
     }
     void                         Close() {
       if (nullptr!=m_outfile) {
-        m_outfile->Close();
+        m_outfile->GetFile()->Close();
       }
     }
     int                          Process() {
@@ -69,7 +70,12 @@ class reader_wrapper {
       if (errorcode) return errorcode;
       errorcode |= bookReader(m_xmlfilename);
       if (errorcode) return errorcode;
+      errorcode |= createTree();
+      if (errorcode) return errorcode;
       errorcode |= initFormulas(m_targetbranchname);
+      if (errorcode) return errorcode;
+      m_outtree->SetBranchStatus("*",0);
+      errorcode |= activateBranches();
       if (errorcode) return errorcode;
       Long64_t entries = m_outtree->GetEntries();
       for (Long64_t e = 0 ; e < entries ; ++e) {
@@ -114,12 +120,15 @@ class reader_wrapper {
     Float_t                      m_response;
     TBranch*                     m_responseBranch;
     TFile*                       m_infile;
-    TFile*                       m_outfile;
+    TDirectoryFile*              m_outfile;
     int                          getVariables(TString);
     int                          bookReader(TString) ;
+    int                          activateBranches();
+    int                          createTree();
     int                          initFormulas(TString);
     int                          getTree(TString,TString,TString);
     int                          GetEntry(Long64_t);
+    int                          Evaluate();
     reader_wrapper() :
                        m_xmlfilename(""),
                        m_targetbranchname(""),
