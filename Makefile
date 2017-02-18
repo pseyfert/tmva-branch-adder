@@ -10,6 +10,8 @@ clean:
 	$(MAKE) -C src clean
 	$(MAKE) -C module clean
 
+PREFIX ?= /usr
+
 install: cplusplus
 	install -d -m 0755 $(PREFIX)/include
 	install -d -m 0755 $(PREFIX)/bin

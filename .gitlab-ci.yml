@@ -3,6 +3,21 @@ before_script:
   - yum install -y glibc-headers glibc-devel git gsl-devel freetype-devel libSM libX11-devel libXext-devel make gcc-c++ gcc binutils libXpm-devel libXft-devel 
   - source /cvmfs/sft.cern.ch/lcg/views/LCG_latest/x86_64-slc6-gcc49-opt/setup.sh
 
-build:
+stages:
+  - build
+  - run
+
+install:
+  stage: build
   script:
     - make install
+  cache:
+    paths:
+      - /usr/bin/tmva-branch-adder
+
+apply:
+  stage: run
+  script:
+    - echo $PATH
+    - curl -O http://root.cern.ch/files/tmva_class_example.root
+    - tmva-branch-adder tmva_class_example.root TreeS test/TMVAClassification_MLPBNN.weights.xml out.root
