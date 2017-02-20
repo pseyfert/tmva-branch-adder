@@ -97,6 +97,8 @@ class reader_wrapper {
       }
       return errorcode;
     }
+
+    std::unordered_set<TBranch*> getBranches() {return m_branches;}
   protected:
     TString                      m_xmlfilename;
     TString                      m_targetbranchname;
