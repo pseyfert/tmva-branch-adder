@@ -122,10 +122,13 @@ class reader_wrapper {
     TFile*                       m_infile;
     TDirectoryFile*              m_outfile;
     int                          getVariables(TString);
+    int                          getVariables() {return getVariables(m_xmlfilename);}
     int                          bookReader(TString) ;
+    int                          bookReader() {return bookReader(m_xmlfilename);}
     int                          activateBranches();
     int                          createTree();
     int                          initFormulas(TString,bool);
+    int                          initFormulas(bool eval_on_in) {return initFormulas(m_xmlfilename, eval_on_in);}
     int                          getTree(TString,TString,TString);
     int                          GetEntry(Long64_t);
     int                          Evaluate();
