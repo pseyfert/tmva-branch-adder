@@ -33,15 +33,15 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  TString xmlfile(args[3]);
-  TString infile(args[1]);
-  TString outfile(args[4]);
-  TString treename(args[2]);
+  TString xmlfile(args[2]);
+  TString infile(args[0]);
+  TString outfile(args[3]);
+  TString treename(args[1]);
 
   int errorcode = 0;
   errorcode |= wrapper.getTree(infile,treename,outfile);
   if (errorcode) return errorcode;
-  if (5==args.size()) errorcode |= wrapper.SetTargetBranch(args[5]);
+  if (5==args.size()) errorcode |= wrapper.SetTargetBranch(args[4]);
   if (errorcode) return errorcode;
   errorcode |= wrapper.SetXMLFile(xmlfile);
   if (errorcode) return errorcode;

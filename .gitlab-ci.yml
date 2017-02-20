@@ -1,7 +1,6 @@
 before_script:
   # from https://root.cern.ch/build-prerequisites
   - yum install -y glibc-headers glibc-devel git gsl-devel freetype-devel libSM libX11-devel libXext-devel make gcc-c++ gcc binutils libXpm-devel libXft-devel 
-  - source /cvmfs/sft.cern.ch/lcg/views/LCG_latest/x86_64-slc6-gcc49-opt/setup.sh
 
 stages:
   - build
@@ -10,14 +9,44 @@ stages:
 install:
   stage: build
   script:
+    - source /cvmfs/sft.cern.ch/lcg/views/LCG_latest/x86_64-slc6-gcc49-opt/setup.sh
     - make install
-  cache:
-    paths:
-      - /usr/bin/tmva-branch-adder
 
-apply:
+latestlcg:
   stage: run
   script:
-    - echo $PATH
+    - source /cvmfs/sft.cern.ch/lcg/views/LCG_latest/x86_64-slc6-gcc49-opt/setup.sh
+    - make install
+    - curl -O http://root.cern.ch/files/tmva_class_example.root
+    - tmva-branch-adder tmva_class_example.root TreeS test/TMVAClassification_MLPBNN.weights.xml out.root
+
+root5:
+  stage: run
+  script:
+    - export USER=nobody
+    - source /cvmfs/lhcb.cern.ch/lib/lhcb/LBSCRIPTS/prod/InstallArea/scripts/LbLogin.sh -c x86_64-slc6-gcc46-opt
+    - source /cvmfs/lhcb.cern.ch/lib/lhcb/LBSCRIPTS/prod/InstallArea/scripts/SetupProject.sh ROOT 5.34.10
+    - make install
+    - curl -O http://root.cern.ch/files/tmva_class_example.root
+    - tmva-branch-adder tmva_class_example.root TreeS test/TMVAClassification_MLPBNN.weights.xml out.root
+
+gcc48:
+  stage: run
+  script:
+    - export USER=nobody
+    - source /cvmfs/lhcb.cern.ch/lib/lhcb/LBSCRIPTS/prod/InstallArea/scripts/LbLogin.sh -c x86_64-slc6-gcc48-opt
+    - source /cvmfs/lhcb.cern.ch/lib/lhcb/LBSCRIPTS/prod/InstallArea/scripts/SetupProject.sh ROOT 6.06.00
+    - make install
+    - curl -O http://root.cern.ch/files/tmva_class_example.root
+    - tmva-branch-adder tmva_class_example.root TreeS test/TMVAClassification_MLPBNN.weights.xml out.root
+
+
+gcc49:
+  stage: run
+  script:
+    - export USER=nobody
+    - source /cvmfs/lhcb.cern.ch/lib/lhcb/LBSCRIPTS/prod/InstallArea/scripts/LbLogin.sh -c x86_64-slc6-gcc49-opt
+    - source /cvmfs/lhcb.cern.ch/lib/lhcb/LBSCRIPTS/prod/InstallArea/scripts/SetupProject.sh ROOT 6.06.08
+    - make install
     - curl -O http://root.cern.ch/files/tmva_class_example.root
     - tmva-branch-adder tmva_class_example.root TreeS test/TMVAClassification_MLPBNN.weights.xml out.root
