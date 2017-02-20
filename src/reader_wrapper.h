@@ -49,6 +49,11 @@ class reader_wrapper {
       /// work around my inabilities to use pyroot
       return SetTree((TTree*)tree);
     }
+    int                          SetOutTree(TTree* tree) {
+      /// TODO: will it be checked for nullptr???
+      m_outtree = tree;
+      return 0;
+    }
     int                          SetTree(TTree* tree) {
       /// if it's a nullptr will be checked later
       m_intree = tree;
