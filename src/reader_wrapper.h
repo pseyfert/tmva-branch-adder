@@ -72,7 +72,7 @@ class reader_wrapper {
       if (errorcode) return errorcode;
       errorcode |= createTree();
       if (errorcode) return errorcode;
-      errorcode |= initFormulas(m_targetbranchname);
+      errorcode |= initFormulas(m_targetbranchname,false);
       if (errorcode) return errorcode;
       m_outtree->SetBranchStatus("*",0);
       errorcode |= activateBranches();
@@ -125,7 +125,7 @@ class reader_wrapper {
     int                          bookReader(TString) ;
     int                          activateBranches();
     int                          createTree();
-    int                          initFormulas(TString);
+    int                          initFormulas(TString,bool);
     int                          getTree(TString,TString,TString);
     int                          GetEntry(Long64_t);
     int                          Evaluate();

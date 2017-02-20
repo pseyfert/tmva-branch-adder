@@ -88,10 +88,10 @@ int reader_wrapper::activateBranches() {
   return 0;
 }
 
-int reader_wrapper::initFormulas(TString targetbranch) {
+int reader_wrapper::initFormulas(TString targetbranch, bool eval_on_in) {
   int buffer(0);
   for (auto& var : m_variables) {
-    var.ttreeformula = new TTreeFormula(Form("local_var_%d",buffer++),var.formula,m_outtree);
+    var.ttreeformula = new TTreeFormula(Form("local_var_%d",buffer++),var.formula,(eval_on_in ? m_intree :m_outtree));
     for (size_t v = 0 ; v < var.ttreeformula->GetNcodes() ; ++v) {
       m_branches.insert(var.ttreeformula->GetLeaf(v)->GetBranch());
     }
