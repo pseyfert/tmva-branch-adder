@@ -20,12 +20,12 @@ int reader_wrapper::getTree(TString infile, TString treename, TString outfile) {
     return 1;
   }
 
-  m_intree = dynamic_cast<TTree*>(m_infile->Get(treename.Data()));
-  if (nullptr == m_intree) {
+  TTree* intree = dynamic_cast<TTree*>(m_infile->Get(treename.Data()));
+  if (nullptr == intree) {
     std::cerr << "Tree " << treename << " could not be opened properly." << std::endl;
     return 2;
   }
-  TDirectory* dir = m_intree->GetDirectory();
+  TDirectory* dir = intree->GetDirectory();
   std::vector<TString> dirnamestack;
   std::vector<TString> dirtitlestack;
   while (0!=strcmp(dir->ClassName(),"TFile")) {
@@ -46,6 +46,7 @@ int reader_wrapper::getTree(TString infile, TString treename, TString outfile) {
     outdir->Write();
     outdir->cd();
   }
+  SetTree(intree);
   SetTargetFile(outdir);
   cwd->cd();
   return 0;
