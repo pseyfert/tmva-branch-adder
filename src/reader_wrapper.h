@@ -128,7 +128,7 @@ class reader_wrapper {
     int                          activateBranches();
     int                          createTree();
     int                          initFormulas(TString,bool);
-    int                          initFormulas(bool eval_on_in) {return initFormulas(m_xmlfilename, eval_on_in);}
+    int                          initFormulas(bool eval_on_in) {return initFormulas(m_targetbranchname, eval_on_in);}
     int                          getTree(TString,TString,TString);
     int                          GetEntry(Long64_t);
     int                          Evaluate();
