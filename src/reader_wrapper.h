@@ -1,15 +1,25 @@
 #pragma once
 #include <stdio.h>
 #include <string.h>
+#if __cplusplus >= 201103L
+#define branchadder_use_blacklist 1
 #include <unordered_set>
+#include "blacklist.h"
+#else
+#warning "Building without additional branch name validation"
+#endif
+#if (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) >= 40900 || __clang__
+#define branchadder_use_regex 1
 #include <regex>
+#else
+#warning "Building test if branch name is a valid c++ variable name"
+#endif
 #include "TString.h"
 #include "TTree.h"
 #include "TFile.h"
 #include "TDirectoryFile.h"
 #include "TMVA/Reader.h"
 #include "TTreeFormula.h"
-#include "blacklist.h"
 
 class VariableWrapper {
   public:
@@ -31,8 +41,16 @@ class reader_wrapper {
       /// TODO check if name is valid as in none of +-/*()#[]<><space><leading digit>  --- more?
       // http://stackoverflow.com/questions/12993187/regular-expression-to-recognize-variable-declarations-in-c
       // https://root.cern.ch/phpBB3/viewtopic.php?f=3&t=21407&p=93337&sid=5f32a5ca9aa01003e4dec96a2f92a2e0#p93337
+#ifdef branchadder_use_regex
       if (std::regex_match(name.Data(),std::regex("([a-zA-Z_][a-zA-Z0-9_]*)"))) {
+#else
+      if (true) {
+#endif
+#ifdef branchadder_use_blacklist
         if (blacklisted(name)) {
+#else
+        if (false) {
+#endif
           return 9;
         }
         m_targetbranchname = name;
@@ -116,7 +134,11 @@ class reader_wrapper {
     TTree*                       m_intree;
     TTree*                       m_outtree;
     TMVA::Reader*                m_reader;
+#if __cplusplus >= 201103L
     std::unordered_set<TBranch*> m_branches;
+#else
+    std::vector<TBranch*>        m_branches;
+#endif
     Float_t                      m_response;
     TBranch*                     m_responseBranch;
     TFile*                       m_infile;
@@ -136,7 +158,9 @@ class reader_wrapper {
                        m_methodName(""),
                        m_variables(),
                        m_spectators(),
+#if __cplusplus >= 201103L
                        m_formulas(0,nullptr),
+#endif
                        m_intree(nullptr),
                        m_outtree(nullptr),
                        m_reader(nullptr),
@@ -148,9 +172,15 @@ class reader_wrapper {
                        m_dirstack(false) {}
     virtual ~reader_wrapper() {
       if (m_reader) delete m_reader;
+#if __cplusplus >= 201103L
       for (auto& var : m_variables) {
         if (var.ttreeformula) delete var.ttreeformula;
       }
+#else
+      for (size_t var = 0; var< m_variables.size(); var++) {
+        if (m_variables[var].ttreeformula) delete m_variables[var].ttreeformula;
+      }
+#endif
     }
 };
 

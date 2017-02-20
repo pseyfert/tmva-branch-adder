@@ -1,8 +1,12 @@
-CPPFLAGS+=$(shell root-config --cflags) -O2 -g -Wextra -Wall -Wshadow -Wpedantic -fPIC
-LDFLAGS+=$(shell root-config --libs) -lMinuit -lFoam -lMathMore -lTMVA -lTreePlayer -lXMLIO -lstdc++ -m64 -g
-CPP=c++
-CXX=c++
-CC=c++
+TMVALOC  ?= $(shell root-config --libdir)/..
+TMVALIBS += -L$(TMVALOC)/lib -lTMVA
+LDFLAGS  += $(TMVALIBS)
+
+CPPFLAGS += $(shell root-config --cflags) -O2 -g -Wextra -Wall -Wshadow -Wpedantic -fPIC
+LDFLAGS  += $(shell root-config --libs) -lMinuit -lFoam -lMathMore -lTreePlayer -lXMLIO -lstdc++ -m64 -g
+CPP       = $(shell root-config --cxx)
+CXX       = $(shell root-config --cxx)
+CC        = $(shell root-config --cxx)
 
 all: main libBranchAdder.so
 

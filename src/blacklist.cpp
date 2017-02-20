@@ -1,4 +1,5 @@
 #include "blacklist.h"
+#if __cplusplus >= 201103L
 
 /// http://stackoverflow.com/questions/17885563/using-c11-unordered-set-in-visual-c-and-clang
 //
@@ -103,3 +104,4 @@ bool blacklisted(TString checkme) {
   if (blacklist.end() == blacklist.find(checkme)) return false;
   return true;
 }
+#endif // __cplusplus >= 201103L
