@@ -38,7 +38,7 @@ int reader_wrapper::getTree(TString infile, TString treename, TString outfile) {
     return 3;
   }
   outdir->cd();
-  while (!dirnamestack.empty()) {
+  while (m_dirstack && !dirnamestack.empty()) {
     outdir = new TDirectoryFile(dirnamestack.back().Data(),dirtitlestack.back().Data());
     dirnamestack.pop_back();
     dirtitlestack.pop_back();

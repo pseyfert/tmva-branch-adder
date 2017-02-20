@@ -121,6 +121,7 @@ class reader_wrapper {
     TBranch*                     m_responseBranch;
     TFile*                       m_infile;
     TDirectoryFile*              m_outfile;
+    bool                         m_dirstack;
     int                          getVariables(TString);
     int                          bookReader(TString) ;
     int                          activateBranches();
@@ -143,7 +144,8 @@ class reader_wrapper {
                        m_response(0.f),
                        m_responseBranch(nullptr),
                        m_infile(nullptr),
-                       m_outfile(nullptr) {}
+                       m_outfile(nullptr),
+                       m_dirstack(false) {}
     virtual ~reader_wrapper() {
       if (m_reader) delete m_reader;
       for (auto& var : m_variables) {
