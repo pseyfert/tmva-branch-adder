@@ -67,6 +67,11 @@ class reader_wrapper {
       /// work around my inabilities to use pyroot
       return SetTree((TTree*)tree);
     }
+    int                          SetOutTree(TTree* tree) {
+      /// TODO: will it be checked for nullptr???
+      m_outtree = tree;
+      return 0;
+    }
     int                          SetTree(TTree* tree) {
       /// if it's a nullptr will be checked later
       m_intree = tree;
@@ -90,7 +95,7 @@ class reader_wrapper {
       if (errorcode) return errorcode;
       errorcode |= createTree();
       if (errorcode) return errorcode;
-      errorcode |= initFormulas(m_targetbranchname);
+      errorcode |= initFormulas(m_targetbranchname,false);
       if (errorcode) return errorcode;
       m_outtree->SetBranchStatus("*",0);
       errorcode |= activateBranches();
@@ -110,6 +115,8 @@ class reader_wrapper {
       }
       return errorcode;
     }
+
+    std::unordered_set<TBranch*> getBranches() {return m_branches;}
   protected:
     TString                      m_xmlfilename;
     TString                      m_targetbranchname;
@@ -145,10 +152,13 @@ class reader_wrapper {
     TDirectoryFile*              m_outfile;
     bool                         m_dirstack;
     int                          getVariables(TString);
+    int                          getVariables() {return getVariables(m_xmlfilename);}
     int                          bookReader(TString) ;
+    int                          bookReader() {return bookReader(m_xmlfilename);}
     int                          activateBranches();
     int                          createTree();
-    int                          initFormulas(TString);
+    int                          initFormulas(TString,bool);
+    int                          initFormulas(bool eval_on_in) {return initFormulas(m_targetbranchname, eval_on_in);}
     int                          getTree(TString,TString,TString);
     int                          GetEntry(Long64_t);
     int                          Evaluate();
