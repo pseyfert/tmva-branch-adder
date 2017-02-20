@@ -151,6 +151,7 @@ class reader_wrapper {
     TFile*                       m_infile;
     TDirectoryFile*              m_outfile;
     bool                         m_dirstack;
+    bool                         m_regression;
     int                          getVariables(TString);
     int                          getVariables() {return getVariables(m_xmlfilename);}
     int                          bookReader(TString) ;
@@ -179,7 +180,8 @@ class reader_wrapper {
                        m_responseBranch(nullptr),
                        m_infile(nullptr),
                        m_outfile(nullptr),
-                       m_dirstack(false) {}
+                       m_dirstack(false),
+                       m_regression(false) {}
     virtual ~reader_wrapper() {
       if (m_reader) delete m_reader;
 #if __cplusplus >= 201103L

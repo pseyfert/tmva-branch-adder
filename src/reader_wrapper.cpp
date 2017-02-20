@@ -62,7 +62,11 @@ int reader_wrapper::Evaluate() {
     m_variables[v].value = m_variables[v].ttreeformula->EvalInstance();
   }
 #endif
-  m_response = m_reader->EvaluateMVA(m_methodName.Data());
+  if (m_regression) {
+    m_response = m_reader->EvaluateRegression(m_methodName.Data())[0];
+  } else {
+    m_response = m_reader->EvaluateMVA(m_methodName.Data());
+  }
   return 0;
 }
 
@@ -156,6 +160,19 @@ int reader_wrapper::getVariables(TString xml_file_name) {
 
   void* mynode = TMVA::gTools().GetChild(rootnode);
   while (mynode!=0) {
+    if (TString( TMVA::gTools().GetName(mynode)) == "GeneralInfo") {
+      void* ch = TMVA::gTools().GetChild(mynode);
+      TString optName, optValue;
+      while (ch) {
+        TMVA::gTools().ReadAttr(ch, "name", optName);
+        if (optName == "AnalysisType") {
+          TMVA::gTools().ReadAttr(ch, "value", optValue);
+          if (optValue == "Regression") m_regression = true;
+          else                          m_regression = false;
+        }
+        ch = TMVA::gTools().GetNextChild(ch);
+      }
+    }
     if (TString( TMVA::gTools().GetName(mynode)) == "Spectators") {
       UInt_t readNSpec;
       TMVA::gTools().ReadAttr( mynode , "NSpec", readNSpec);
