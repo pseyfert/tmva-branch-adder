@@ -46,7 +46,7 @@ gcc49:
   script:
     - export USER=nobody
     - source /cvmfs/lhcb.cern.ch/lib/lhcb/LBSCRIPTS/prod/InstallArea/scripts/LbLogin.sh -c x86_64-slc6-gcc49-opt
-    - source /cvmfs/lhcb.cern.ch/lib/lhcb/LBSCRIPTS/prod/InstallArea/scripts/SetupProject.sh ROOT 6.06.08
+    - source /cvmfs/lhcb.cern.ch/lib/lhcb/LBSCRIPTS/prod/InstallArea/scripts/SetupProject.sh ROOT 6.06.02
     - make install
     - curl -O http://root.cern.ch/files/tmva_class_example.root
     - tmva-branch-adder tmva_class_example.root TreeS test/TMVAClassification_MLPBNN.weights.xml out.root

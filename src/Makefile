@@ -2,7 +2,7 @@ TMVALOC  ?= $(shell root-config --libdir)/..
 TMVALIBS += -L$(TMVALOC)/lib -lTMVA
 LDFLAGS  += $(TMVALIBS)
 
-CPPFLAGS += $(shell root-config --cflags) -O2 -g -Wextra -Wall -Wshadow -Wpedantic -fPIC
+CPPFLAGS += $(shell root-config --cflags) -O2 -g -Wextra -Wall -Wshadow -fPIC # -Wpedantic (not available in gcc 4.6)
 LDFLAGS  += $(shell root-config --libs) -lMinuit -lFoam -lMathMore -lTreePlayer -lXMLIO -lstdc++ -m64 -g
 CPP       = $(shell root-config --cxx)
 CXX       = $(shell root-config --cxx)
