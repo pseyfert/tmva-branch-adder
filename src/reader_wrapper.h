@@ -116,7 +116,11 @@ class reader_wrapper {
       return errorcode;
     }
 
+#if __cplusplus >= 201103L
     std::unordered_set<TBranch*> getBranches() {return m_branches;}
+#else
+    std::vector<TBranch*>        getBranches() {return m_branches;}
+#endif
   protected:
     TString                      m_xmlfilename;
     TString                      m_targetbranchname;
