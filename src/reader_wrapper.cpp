@@ -12,223 +12,371 @@
 #include "TMVA/Reader.h"
 #include "reader_wrapper.h"
 
-int reader_wrapper::getTree(TString infile, TString treename, TString outfile) {
-  TDirectory* cwd = gDirectory;
-  m_infile = TFile::Open(infile,"read");
-  if (nullptr == m_infile || m_infile->IsZombie() || m_infile->GetNkeys() <= 0) {
-    std::cerr << "File " << infile << " could not be opened properly." << std::endl;
-    return 1;
-  }
+int reader_wrapper::getTree(TString infile, TString treename, TString outfile)
+{
+   TDirectory *cwd = gDirectory;
+   m_infile = TFile::Open(infile, "read");
+   if (nullptr == m_infile || m_infile->IsZombie() || m_infile->GetNkeys() <= 0) {
+      std::cerr << "File " << infile << " could not be opened properly." << std::endl;
+      return 1;
+   }
 
-  TTree* intree = dynamic_cast<TTree*>(m_infile->Get(treename.Data()));
-  if (nullptr == intree) {
-    std::cerr << "Tree " << treename << " could not be opened properly." << std::endl;
-    return 2;
-  }
-  TDirectory* dir = intree->GetDirectory();
-  std::vector<TString> dirnamestack;
-  std::vector<TString> dirtitlestack;
-  while (0!=strcmp(dir->ClassName(),"TFile")) {
-    dirnamestack.push_back(dir->GetName());
-    dirtitlestack.push_back(dir->GetTitle());
-    dir = dir->GetMotherDir();
-  }
-  TDirectoryFile* outdir = TFile::Open(outfile,"create");
-  if (nullptr == outdir || outdir->IsZombie()) {
-    std::cerr << "File " << outfile << " could not be opened properly." << std::endl;
-    return 3;
-  }
-  outdir->cd();
-  while (m_dirstack && !dirnamestack.empty()) {
-    outdir = new TDirectoryFile(dirnamestack.back().Data(),dirtitlestack.back().Data());
-    dirnamestack.pop_back();
-    dirtitlestack.pop_back();
-    outdir->Write();
-    outdir->cd();
-  }
-  SetTree(intree);
-  SetTargetFile(outdir);
-  cwd->cd();
-  return 0;
+   TTree *intree = dynamic_cast<TTree *>(m_infile->Get(treename.Data()));
+   if (nullptr == intree) {
+      std::cerr << "Tree " << treename << " could not be opened properly." << std::endl;
+      return 2;
+   }
+   TDirectory *dir = intree->GetDirectory();
+   std::vector<TString> dirnamestack;
+   std::vector<TString> dirtitlestack;
+   while (0 != strcmp(dir->ClassName(), "TFile")) {
+      dirnamestack.push_back(dir->GetName());
+      dirtitlestack.push_back(dir->GetTitle());
+      dir = dir->GetMotherDir();
+   }
+   TDirectoryFile *outdir = TFile::Open(outfile, "create");
+   if (nullptr == outdir || outdir->IsZombie()) {
+      std::cerr << "File " << outfile << " could not be opened properly." << std::endl;
+      return 3;
+   }
+   outdir->cd();
+   while (m_dirstack && !dirnamestack.empty()) {
+      outdir = new TDirectoryFile(dirnamestack.back().Data(), dirtitlestack.back().Data());
+      dirnamestack.pop_back();
+      dirtitlestack.pop_back();
+      outdir->Write();
+      outdir->cd();
+   }
+   SetTree(intree);
+   SetTargetFile(outdir);
+   cwd->cd();
+   return 0;
 }
 
-int reader_wrapper::Evaluate() {
+int reader_wrapper::Evaluate()
+{
 #if __cplusplus >= 201103
-  for (auto& v : m_variables) {
-    v.value = v.ttreeformula->EvalInstance();
-  }
+   for (auto &v : m_variables) {
+      v.value = v.ttreeformula->EvalInstance();
+   }
 #else
-  for (size_t v = 0;  v< m_variables.size(); ++v ) {
-    m_variables[v].value = m_variables[v].ttreeformula->EvalInstance();
-  }
+   for (size_t v = 0; v < m_variables.size(); ++v) {
+      m_variables[v].value = m_variables[v].ttreeformula->EvalInstance();
+   }
 #endif
-  if (m_regression) {
-    m_response = m_reader->EvaluateRegression(m_methodName.Data())[0];
-  } else {
-    m_response = m_reader->EvaluateMVA(m_methodName.Data());
-  }
-  return 0;
+   if (m_regression) {
+      m_response = m_reader->EvaluateRegression(m_methodName.Data())[0];
+   } else {
+      m_response = m_reader->EvaluateMVA(m_methodName.Data());
+   }
+   return 0;
 }
 
-int reader_wrapper::GetEntry(Long64_t e) {
-  /// don't care about spectators here
+int reader_wrapper::GetEntry(Long64_t e)
+{
+/// don't care about spectators here
 #if __cplusplus >= 201103
-  for (auto b: m_branches) {
-    b->GetEntry(e);
-  }
+   for (auto b : m_branches) {
+      b->GetEntry(e);
+   }
 #else
-  for (size_t b = 0 ; b< m_branches.size() ; ++b) {
-    m_branches[b]->GetEntry(e);
-  }
+   for (size_t b = 0; b < m_branches.size(); ++b) {
+      m_branches[b]->GetEntry(e);
+   }
 #endif
-  return Evaluate();
+   return Evaluate();
 }
 
-int reader_wrapper::createTree() {
-  /// don't care about spectators here
-  // TODO: does this tree get created in the outfile?
-  m_intree->SetBranchStatus("*",1);
-  TDirectory* cwd = gDirectory;
-  if (nullptr!=m_outfile) {
-    m_outfile->cd();
-  }
-  m_outtree = m_intree->CloneTree(-1,"fast");
-  m_outtree->SetDirectory(m_outfile);
-  cwd->cd();
-  return 0;
+int reader_wrapper::createTree()
+{
+   /// don't care about spectators here
+   // TODO: does this tree get created in the outfile?
+   m_intree->SetBranchStatus("*", 1);
+   TDirectory *cwd = gDirectory;
+   if (nullptr != m_outfile) {
+      m_outfile->cd();
+   }
+   m_outtree = m_intree->CloneTree(-1, "fast");
+   m_outtree->SetDirectory(m_outfile);
+   cwd->cd();
+   return 0;
 }
 
-int reader_wrapper::activateBranches() {
+int reader_wrapper::activateBranches()
+{
 #if __cplusplus >= 201103
-  for (auto b : m_branches) {
-    b->SetStatus(1);
-  }
+   for (auto b : m_branches) {
+      b->SetStatus(1);
+   }
 #else
-  for (size_t b =0 ; b<m_branches.size() ; ++b) {
-    m_branches[b]->SetStatus(1);
-  }
+   for (size_t b = 0; b < m_branches.size(); ++b) {
+      m_branches[b]->SetStatus(1);
+   }
 #endif
-  m_responseBranch->SetStatus(1);
-  return 0;
+   m_responseBranch->SetStatus(1);
+   return 0;
 }
 
-int reader_wrapper::initFormulas(TString targetbranch, bool eval_on_in) {
-  int buffer(0);
+int reader_wrapper::initFormulas(TString targetbranch, bool eval_on_in)
+{
+   int buffer(0);
 #if __cplusplus >= 201103
-  for (auto& var : m_variables) {
-    var.ttreeformula = new TTreeFormula(Form("local_var_%d",buffer++),var.formula,(eval_on_in ? m_intree :m_outtree));
-    for (size_t v = 0 ; v < var.ttreeformula->GetNcodes() ; ++v) {
-      m_branches.insert(var.ttreeformula->GetLeaf(v)->GetBranch());
-    }
-  }
+   for (auto &var : m_variables) {
+      var.ttreeformula =
+         new TTreeFormula(Form("local_var_%d", buffer++), var.formula, (eval_on_in ? m_intree : m_outtree));
+      for (size_t v = 0; v < var.ttreeformula->GetNcodes(); ++v) {
+         m_branches.insert(var.ttreeformula->GetLeaf(v)->GetBranch());
+      }
+   }
 #else
-  for (size_t var = 0; var < m_variables.size(); var++) {
-    m_variables[var].ttreeformula = new TTreeFormula(Form("local_var_%d",buffer++),m_variables[var].formula,m_outtree);
-    for (size_t v = 0 ; v < m_variables[var].ttreeformula->GetNcodes() ; ++v) {
-      m_branches.push_back(m_variables[var].ttreeformula->GetLeaf(v)->GetBranch());
-    }
-  }
+   for (size_t var = 0; var < m_variables.size(); var++) {
+      m_variables[var].ttreeformula =
+         new TTreeFormula(Form("local_var_%d", buffer++), m_variables[var].formula, m_outtree);
+      for (size_t v = 0; v < m_variables[var].ttreeformula->GetNcodes(); ++v) {
+         m_branches.push_back(m_variables[var].ttreeformula->GetLeaf(v)->GetBranch());
+      }
+   }
 #endif
-  // check if output branch exists already
-  if (nullptr == m_outtree->GetBranch(targetbranch.Data())) {
-    m_responseBranch = m_outtree->Branch(targetbranch.Data(),&m_response,(targetbranch + "/F").Data());
-    return 0;
-  }
-  std::cout << "Output branch exists already. Aborting." << std::endl;
-  return 4;
+   // check if output branch exists already
+   if (nullptr == m_outtree->GetBranch(targetbranch.Data())) {
+      m_responseBranch = m_outtree->Branch(targetbranch.Data(), &m_response, (targetbranch + "/F").Data());
+      return 0;
+   }
+   std::cout << "Output branch exists already. Aborting." << std::endl;
+   return 4;
 }
 
-int reader_wrapper::getVariables(TString xml_file_name) {
-  /// mostly copied from TMVA MethodBase
-  // TODO error handling
-  void* doc = TMVA::gTools().xmlengine().ParseFile(xml_file_name,TMVA::gTools().xmlenginebuffersize()); // the default buffer size in TXMLEngine::ParseFile is 100k. Starting with ROOT 5.29 one can set the buffer size, see: http://savannah.cern.ch/bugs/?78864. This might be necessary for large XML files
-  void* rootnode = TMVA::gTools().xmlengine().DocGetRootElement(doc); // node "MethodSetup"
-  TString fullMethodName;
-  TMVA::gTools().ReadAttr( rootnode, "Method", fullMethodName );
-  //http://stackoverflow.com/questions/14265581/parse-split-a-string-in-c-using-string-delimiter-standard-c
-  std::string fullMethodName_string(fullMethodName.Data());
-  std::string delimiter = "::";
+int reader_wrapper::getVariables(TString xml_file_name)
+{
+   /// mostly copied from TMVA MethodBase
+   // TODO error handling
+   void *doc = TMVA::gTools().xmlengine().ParseFile(
+      xml_file_name, TMVA::gTools().xmlenginebuffersize()); // the default buffer size in TXMLEngine::ParseFile is 100k.
+                                                            // Starting with ROOT 5.29 one can set the buffer size, see:
+                                                            // http://savannah.cern.ch/bugs/?78864. This might be
+                                                            // necessary for large XML files
+   void *rootnode = TMVA::gTools().xmlengine().DocGetRootElement(doc); // node "MethodSetup"
+   TString fullMethodName;
+   TMVA::gTools().ReadAttr(rootnode, "Method", fullMethodName);
+   // http://stackoverflow.com/questions/14265581/parse-split-a-string-in-c-using-string-delimiter-standard-c
+   std::string fullMethodName_string(fullMethodName.Data());
+   std::string delimiter = "::";
 
-  size_t pos = 0;
-  std::string token;
-  while ((pos = fullMethodName_string.find(delimiter)) != std::string::npos) {
-    fullMethodName_string.substr(0, pos);
-    fullMethodName_string.erase(0, pos + delimiter.length());
-  }
-  m_methodName = TString(fullMethodName_string.c_str());
+   size_t pos = 0;
+   std::string token;
+   while ((pos = fullMethodName_string.find(delimiter)) != std::string::npos) {
+      fullMethodName_string.substr(0, pos);
+      fullMethodName_string.erase(0, pos + delimiter.length());
+   }
+   m_methodName = TString(fullMethodName_string.c_str());
 
-
-  void* mynode = TMVA::gTools().GetChild(rootnode);
-  while (mynode!=0) {
-    if (TString( TMVA::gTools().GetName(mynode)) == "GeneralInfo") {
-      void* ch = TMVA::gTools().GetChild(mynode);
-      TString optName, optValue;
-      while (ch) {
-        TMVA::gTools().ReadAttr(ch, "name", optName);
-        if (optName == "AnalysisType") {
-          TMVA::gTools().ReadAttr(ch, "value", optValue);
-          if (optValue == "Regression") m_regression = true;
-          else                          m_regression = false;
-        }
-        ch = TMVA::gTools().GetNextChild(ch);
+   void *mynode = TMVA::gTools().GetChild(rootnode);
+   while (mynode != 0) {
+      if (TString(TMVA::gTools().GetName(mynode)) == "GeneralInfo") {
+         void *ch = TMVA::gTools().GetChild(mynode);
+         TString optName, optValue;
+         while (ch) {
+            TMVA::gTools().ReadAttr(ch, "name", optName);
+            if (optName == "AnalysisType") {
+               TMVA::gTools().ReadAttr(ch, "value", optValue);
+               if (optValue == "Regression")
+                  m_regression = true;
+               else
+                  m_regression = false;
+            }
+            ch = TMVA::gTools().GetNextChild(ch);
+         }
       }
-    }
-    if (TString( TMVA::gTools().GetName(mynode)) == "Spectators") {
-      UInt_t readNSpec;
-      TMVA::gTools().ReadAttr( mynode , "NSpec", readNSpec);
-      TMVA::VariableInfo readSpecInfo;
-      void* ch = TMVA::gTools().GetChild(mynode);
-      while (ch) {
-        readSpecInfo.ReadFromXML(ch);
-        m_spectators.push_back(VariableWrapper(TString(readSpecInfo.GetExpression())));
-        ch = TMVA::gTools().GetNextChild(ch);
+      if (TString(TMVA::gTools().GetName(mynode)) == "Spectators") {
+         UInt_t readNSpec;
+         TMVA::gTools().ReadAttr(mynode, "NSpec", readNSpec);
+         TMVA::VariableInfo readSpecInfo;
+         void *ch = TMVA::gTools().GetChild(mynode);
+         while (ch) {
+            readSpecInfo.ReadFromXML(ch);
+            m_spectators.push_back(VariableWrapper(TString(readSpecInfo.GetExpression())));
+            ch = TMVA::gTools().GetNextChild(ch);
+         }
+         if (m_spectators.size() != readNSpec) {
+            m_spectators.clear();
+            // TODO error message
+            return 2;
+         }
       }
-      if (m_spectators.size()!=readNSpec) {
-        m_spectators.clear();
-        // TODO error message
-        return 2;
+      if (TString(TMVA::gTools().GetName(mynode)) == "Variables") {
+         UInt_t readNVar;
+         TMVA::gTools().ReadAttr(mynode, "NVar", readNVar);
+         TMVA::VariableInfo readVarInfo;
+         void *ch = TMVA::gTools().GetChild(mynode);
+         while (ch) {
+            readVarInfo.ReadFromXML(ch);
+            m_variables.push_back(VariableWrapper(TString(readVarInfo.GetExpression())));
+            ch = TMVA::gTools().GetNextChild(ch);
+         }
+         if (m_variables.size() != readNVar) {
+            m_variables.clear();
+            // TODO error message
+            return 2;
+         }
       }
-    }
-    if (TString( TMVA::gTools().GetName(mynode)) == "Variables") {
-      UInt_t readNVar;
-      TMVA::gTools().ReadAttr( mynode , "NVar", readNVar);
-      TMVA::VariableInfo readVarInfo;
-      void* ch = TMVA::gTools().GetChild(mynode);
-      while (ch) {
-        readVarInfo.ReadFromXML(ch);
-        m_variables.push_back(VariableWrapper(TString(readVarInfo.GetExpression())));
-        ch = TMVA::gTools().GetNextChild(ch);
-      }
-      if (m_variables.size()!=readNVar) {
-        m_variables.clear();
-        // TODO error message
-        return 2;
-      }
-    }
-    mynode = TMVA::gTools().GetNextChild(mynode);
-  }
-  // TODO error message
-  return m_variables.empty()?1:0;
+      mynode = TMVA::gTools().GetNextChild(mynode);
+   }
+   // TODO error message
+   return m_variables.empty() ? 1 : 0;
 }
 
-int reader_wrapper::bookReader( TString xml_file_name) {
-  m_reader = new TMVA::Reader("!Color:Silent");
+int reader_wrapper::bookReader(TString xml_file_name)
+{
+   m_reader = new TMVA::Reader("!Color:Silent");
 #if __cplusplus >= 201103
-  for (auto var : m_spectators) {
-    m_reader->AddSpectator(var.formula, &var.value);
-  }
-  for (auto& var : m_variables) {
-    m_reader->AddVariable(var.formula, &var.value);
-  }
+   for (auto var : m_spectators) {
+      m_reader->AddSpectator(var.formula, &var.value);
+   }
+   for (auto &var : m_variables) {
+      m_reader->AddVariable(var.formula, &var.value);
+   }
 #else
-  for (size_t var =0 ; var<m_spectators.size() ; ++var) {
-    m_reader->AddSpectator(m_spectators[var].formula, &(m_spectators[var].value));
-  }
-  for (size_t var =0 ; var<m_variables.size(); var++) {
-    m_reader->AddVariable(m_variables[var].formula, &(m_variables[var].value));
-  }
+   for (size_t var = 0; var < m_spectators.size(); ++var) {
+      m_reader->AddSpectator(m_spectators[var].formula, &(m_spectators[var].value));
+   }
+   for (size_t var = 0; var < m_variables.size(); var++) {
+      m_reader->AddVariable(m_variables[var].formula, &(m_variables[var].value));
+   }
 #endif
-  m_reader->BookMVA( m_methodName, xml_file_name );
-  return 0;
+   m_reader->BookMVA(m_methodName, xml_file_name);
+   return 0;
 }
 
+int reader_wrapper::SetTargetFile(TDirectoryFile *file)
+{
+   m_outfile = file;
+   return 0;
+}
+int reader_wrapper::SetTargetBranch(TString name)
+{
+/// TODO check if name is valid as in none of +-/*()#[]<><space><leading digit>  --- more?
+// http://stackoverflow.com/questions/12993187/regular-expression-to-recognize-variable-declarations-in-c
+// https://root.cern.ch/phpBB3/viewtopic.php?f=3&t=21407&p=93337&sid=5f32a5ca9aa01003e4dec96a2f92a2e0#p93337
+#ifdef branchadder_use_regex
+   if (std::regex_match(name.Data(), std::regex("([a-zA-Z_][a-zA-Z0-9_]*)")))
+#else
+   if (true)
+#endif
+   {
+#ifdef branchadder_use_blacklist
+      if (blacklisted(name))
+#else
+      if (false)
+#endif
+      {
+         return 9;
+      }
+      m_targetbranchname = name;
+      return 0;
+   }
+   return 8;
+}
+int reader_wrapper::SetXMLFile(TString filename)
+{
+   m_xmlfilename = filename;
+   return 0;
+   /// TODO: check if file can be parsed
+}
+int reader_wrapper::SetTree(TObject *tree)
+{
+   /// work around my inabilities to use pyroot
+   return SetTree((TTree *)tree);
+}
+int reader_wrapper::SetOutTree(TTree *tree)
+{
+   /// TODO: will it be checked for nullptr???
+   m_outtree = tree;
+   return 0;
+}
+int reader_wrapper::SetTree(TTree *tree)
+{
+   /// if it's a nullptr will be checked later
+   m_intree = tree;
+   return 0;
+}
+void reader_wrapper::Close()
+{
+   if (nullptr != m_outfile) {
+      m_outfile->GetFile()->Close();
+   }
+}
+int reader_wrapper::Process()
+{
+   int errorcode = 0;
+   errorcode |= check_all_initialised();
+   if (errorcode) return errorcode;
+   errorcode |= getVariables(m_xmlfilename);
+   if (m_targetbranchname == TString("")) {
+      m_targetbranchname = m_methodName;
+   }
+   if (errorcode) return errorcode;
+   errorcode |= bookReader(m_xmlfilename);
+   if (errorcode) return errorcode;
+   errorcode |= createTree();
+   if (errorcode) return errorcode;
+   errorcode |= initFormulas(m_targetbranchname, false);
+   if (errorcode) return errorcode;
+   m_outtree->SetBranchStatus("*", 0);
+   errorcode |= activateBranches();
+   if (errorcode) return errorcode;
+   Long64_t entries = m_outtree->GetEntries();
+   for (Long64_t e = 0; e < entries; ++e) {
+      errorcode |= GetEntry(e);
+      if (m_responseBranch->Fill() > 0)
+         errorcode |= 0;
+      else
+         errorcode |= 3;
+      if (errorcode) return errorcode;
+   }
+   m_outtree->SetBranchStatus("*", 1);
+   if (nullptr != m_outfile) {
+      /// maybe the tree is supposed to be kept in RAM and not written to disk?
+      m_outfile->WriteTObject(m_outtree);
+      /// TODO check return value
+   }
+   return errorcode;
+}
+
+#if __cplusplus >= 201103L
+std::unordered_set<TBranch *> reader_wrapper::getBranches()
+{
+   return m_branches;
+}
+#else
+std::vector<TBranch *> reader_wrapper::getBranches()
+{
+   return m_branches;
+}
+#endif
+
+int reader_wrapper::check_all_initialised()
+{
+   int errorcode = 0;
+   if (nullptr == m_intree) {
+      std::cerr << "no TTree to process provided" << std::endl;
+      errorcode |= 1 << 0;
+   }
+   if (m_xmlfilename == TString("")) {
+      std::cerr << "no XML file with classifier provided" << std::endl;
+      errorcode |= 1 << 1;
+   }
+   return errorcode;
+}
+
+int reader_wrapper::getVariables()
+{
+   return getVariables(m_xmlfilename);
+}
+int reader_wrapper::bookReader()
+{
+   return bookReader(m_xmlfilename);
+}
+int reader_wrapper::initFormulas(bool eval_on_in)
+{
+   return initFormulas(m_targetbranchname, eval_on_in);
+}
