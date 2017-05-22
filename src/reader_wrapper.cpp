@@ -131,7 +131,7 @@ int reader_wrapper::initFormulas(TString targetbranch, bool eval_on_in)
 #else
    for (size_t var = 0; var < m_variables.size(); var++) {
       m_variables[var].ttreeformula =
-         new TTreeFormula(Form("local_var_%d", buffer++), m_variables[var].formula, m_outtree);
+         new TTreeFormula(Form("local_var_%d", buffer++), m_variables[var].formula, (eval_on_in ? m_intree : m_outtree));
       for (size_t v = 0; v < m_variables[var].ttreeformula->GetNcodes(); ++v) {
          m_branches.push_back(m_variables[var].ttreeformula->GetLeaf(v)->GetBranch());
       }
