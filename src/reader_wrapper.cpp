@@ -12,6 +12,18 @@
 #include "TMVA/Reader.h"
 #include "reader_wrapper.h"
 
+/**
+ * @brief boiler plate for most bare use case
+ *
+ * Obtain input filename and tree name, and output filename, all in strings. It
+ * handles the opening of files and retrives the TTree from there.
+ *
+ * @param infile   filename of the input file. Any protocol that can be handled by TFile::Open should do.
+ * @param treename name of the TTree object in the input file to be evaluated (can obtain slashes, anything that TFile::Get can handle should do).
+ * @param outfile  filename of the output file.
+ *
+ * @return 0 in case of success. larger integers otherwise.
+ */
 int reader_wrapper::getTree(TString infile, TString treename, TString outfile)
 {
    TDirectory *cwd = gDirectory;
@@ -53,6 +65,15 @@ int reader_wrapper::getTree(TString infile, TString treename, TString outfile)
    return 0;
 }
 
+/**
+ * @brief Evaluate the MVA.
+ *
+ * Evaluates all formulas of input variables and the MVA. Output is written to
+ * the member m_response (which should be the branch address of an output
+ * branch from reader_wrapper::initFormulas.
+ *
+ * @return 0 in case of success.
+ */
 int reader_wrapper::Evaluate()
 {
 #if __cplusplus >= 201103
@@ -72,6 +93,16 @@ int reader_wrapper::Evaluate()
    return 0;
 }
 
+/**
+ * @brief Do all that's needed to be done on a per-event basis
+ *
+ * Calls TBranch::GetEntry for all branches that are needed for input variable
+ * formulas, evaluates all formulas and evaluates the MVA.
+ *
+ * @param e entry number of the TTree
+ *
+ * @return 0 in case of success
+ */
 int reader_wrapper::GetEntry(Long64_t e)
 {
 /// don't care about spectators here
@@ -102,6 +133,11 @@ int reader_wrapper::createTree()
    return 0;
 }
 
+/**
+ * @brief Activate all branches of the input TTree which are needed for MVA evaluation
+ *
+ * @return 0 in case of success.
+ */
 int reader_wrapper::activateBranches()
 {
 #if __cplusplus >= 201103
@@ -117,6 +153,20 @@ int reader_wrapper::activateBranches()
    return 0;
 }
 
+/**
+ * @brief Instantiate TTreeFormulas and create target branch
+ *
+ * To be called once the output tree exists and after the XML file has been
+ * parsed. From the internal input variable objects, TTreeFormulas get
+ * configured to be evaluated on the tree with the input variables. A branch
+ * for the response on the output tree is created and the branch set to use the
+ * internal response storage as memory location.
+ *
+ * @param targetbranch name of the branch for the MVA response
+ * @param eval_on_in   if the formulas should be evaluated on the input tree
+ *
+ * @return 0 in case of success. Higher numbers in case of error.
+ */
 int reader_wrapper::initFormulas(TString targetbranch, bool eval_on_in)
 {
    int buffer(0);
@@ -146,6 +196,13 @@ int reader_wrapper::initFormulas(TString targetbranch, bool eval_on_in)
    return 4;
 }
 
+/**
+ * @brief Parse the XML file. Can be called before input or output tree are assigned.
+ *
+ * @param xml_file_name filename of the XML file
+ *
+ * @return 0 in case of success, higher integer otherwise.
+ */
 int reader_wrapper::getVariables(TString xml_file_name)
 {
    /// mostly copied from TMVA MethodBase
@@ -225,6 +282,13 @@ int reader_wrapper::getVariables(TString xml_file_name)
    return m_variables.empty() ? 1 : 0;
 }
 
+/**
+ * @brief Instantiate the TMVA reader. Must be called after getVariables. Can be called before initFormulas.
+ *
+ * @param xml_file_name filename of the XML file.
+ *
+ * @return 0 in case of success.
+ */
 int reader_wrapper::bookReader(TString xml_file_name)
 {
    m_reader = new TMVA::Reader("!Color:Silent");
@@ -252,6 +316,17 @@ int reader_wrapper::SetTargetFile(TDirectoryFile *file)
    m_outfile = file;
    return 0;
 }
+
+/**
+ * @brief Specify the target branch name, which will be created in initFormulas. Checks the validity of the branch name.
+ * 
+ * If possible, it is checked if the branch name would create trouble in
+ * TTree::Draw or TTree::MakeClass when using the output file.
+ *
+ * @param name response branch name
+ *
+ * @return 0 in case of success
+ */
 int reader_wrapper::SetTargetBranch(TString name)
 {
 /// TODO check if name is valid as in none of +-/*()#[]<><space><leading digit>  --- more?
