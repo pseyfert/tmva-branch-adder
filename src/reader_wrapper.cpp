@@ -130,8 +130,8 @@ int reader_wrapper::initFormulas(TString targetbranch, bool eval_on_in)
    }
 #else
    for (size_t var = 0; var < m_variables.size(); var++) {
-      m_variables[var].ttreeformula =
-         new TTreeFormula(Form("local_var_%d", buffer++), m_variables[var].formula, (eval_on_in ? m_intree : m_outtree));
+      m_variables[var].ttreeformula = new TTreeFormula(Form("local_var_%d", buffer++), m_variables[var].formula,
+                                                       (eval_on_in ? m_intree : m_outtree));
       for (size_t v = 0; v < m_variables[var].ttreeformula->GetNcodes(); ++v) {
          m_branches.push_back(m_variables[var].ttreeformula->GetLeaf(v)->GetBranch());
       }
@@ -379,4 +379,28 @@ int reader_wrapper::bookReader()
 int reader_wrapper::initFormulas(bool eval_on_in)
 {
    return initFormulas(m_targetbranchname, eval_on_in);
+}
+
+reader_wrapper::reader_wrapper()
+   : m_xmlfilename(""), m_targetbranchname(""), m_methodName(""), m_variables(), m_spectators(),
+#if __cplusplus >= 201103L
+     m_formulas(0, nullptr),
+#endif
+     m_intree(nullptr), m_outtree(nullptr), m_reader(nullptr), m_branches(), m_response(0.f), m_responseBranch(nullptr),
+     m_infile(nullptr), m_outfile(nullptr), m_dirstack(false), m_regression(false)
+{
+}
+
+reader_wrapper::~reader_wrapper()
+{
+   if (m_reader) delete m_reader;
+#if __cplusplus >= 201103L
+   for (auto &var : m_variables) {
+      if (var.ttreeformula) delete var.ttreeformula;
+   }
+#else
+   for (size_t var = 0; var < m_variables.size(); var++) {
+      if (m_variables[var].ttreeformula) delete m_variables[var].ttreeformula;
+   }
+#endif
 }

@@ -37,6 +37,7 @@ public:
 class reader_wrapper {
 public:
    //// new interface
+   void CopyDirectoryStack() { m_dirstack = true; }
    int SetTargetFile(TDirectoryFile *file);
    int SetTargetBranch(TString name);
    int SetXMLFile(TString filename);
@@ -56,7 +57,6 @@ protected:
    TString m_targetbranchname;
    int check_all_initialised();
    //// old interface
-public:
    TString m_methodName;
    std::vector<VariableWrapper> m_variables;
    std::vector<VariableWrapper> m_spectators;
@@ -75,6 +75,8 @@ public:
    TDirectoryFile *m_outfile;
    bool m_dirstack;
    bool m_regression;
+
+public:
    int getVariables(TString);
    int getVariables();
    int bookReader(TString);
@@ -86,26 +88,6 @@ public:
    int getTree(TString, TString, TString);
    int GetEntry(Long64_t);
    int Evaluate();
-   reader_wrapper()
-      : m_xmlfilename(""), m_targetbranchname(""), m_methodName(""), m_variables(), m_spectators(),
-#if __cplusplus >= 201103L
-        m_formulas(0, nullptr),
-#endif
-        m_intree(nullptr), m_outtree(nullptr), m_reader(nullptr), m_branches(), m_response(0.f),
-        m_responseBranch(nullptr), m_infile(nullptr), m_outfile(nullptr), m_dirstack(false), m_regression(false)
-   {
-   }
-   virtual ~reader_wrapper()
-   {
-      if (m_reader) delete m_reader;
-#if __cplusplus >= 201103L
-      for (auto &var : m_variables) {
-         if (var.ttreeformula) delete var.ttreeformula;
-      }
-#else
-      for (size_t var = 0; var < m_variables.size(); var++) {
-         if (m_variables[var].ttreeformula) delete m_variables[var].ttreeformula;
-      }
-#endif
-   }
+   reader_wrapper();
+   virtual ~reader_wrapper();
 };
