@@ -32,8 +32,9 @@ Thanks for input from
 
 # legacy ROOT/GCC
 
-We encountered a root 5.34 / gcc 4.6 setup where this tool did not build (requires c++11).
-There's now a separate branch (no-c++11) with compatibility on a minimum effort basis.
+Since 0.4 (and on master at the time of writing), tmva-branch-adder should
+build w/ and w/o c++11, as well as with root5 and root6, and with c++11 also
+when using gcc 4.8 (not fully c++11 compatible).
 
 # Dependencies
 
