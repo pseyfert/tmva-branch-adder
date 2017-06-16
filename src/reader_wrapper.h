@@ -44,6 +44,7 @@ public:
    int SetTree(TObject *tree);
    int SetOutTree(TTree *tree);
    int SetTree(TTree *tree);
+   TTree *GetOutTree() { return m_outtree;}
    void Close();
    int Process();
 #if __cplusplus >= 201103L
