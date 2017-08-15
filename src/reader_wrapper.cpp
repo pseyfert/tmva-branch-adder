@@ -187,6 +187,9 @@ int reader_wrapper::initFormulas(TString targetbranch, bool eval_on_in)
       }
    }
 #endif
+   if (targetbranch == TString("")) {
+      targetbranch = m_methodName;
+   }
    // check if output branch exists already
    if (nullptr == m_outtree->GetBranch(targetbranch.Data())) {
       m_responseBranch = m_outtree->Branch(targetbranch.Data(), &m_response, (targetbranch + "/F").Data());
@@ -386,9 +389,6 @@ int reader_wrapper::Process()
    errorcode |= check_all_initialised();
    if (errorcode) return errorcode;
    errorcode |= getVariables(m_xmlfilename);
-   if (m_targetbranchname == TString("")) {
-      m_targetbranchname = m_methodName;
-   }
    if (errorcode) return errorcode;
    errorcode |= bookReader(m_xmlfilename);
    if (errorcode) return errorcode;
