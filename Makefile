@@ -23,14 +23,18 @@ install: cplusplus
 
 test/dataset/weights/TMVAClassification_MLPBNN.weights.xml:
 	mkdir -p test
-	(cd test; root -l -b -q -n ${ROOTSYS}/tutorials/tmva/TMVAClassification.C\(\"MLPBNN\"\) )
+	(cd test && root -l -b -q -n ${ROOTSYS}/tutorials/tmva/TMVAClassification.C\(\"MLPBNN\"\) )
 
 test/files/tmva_class_example.root:
 	mkdir -p test
-	(cd test; root -l -b -q -n ${ROOTSYS}/tutorials/tmva/TMVAClassification.C\(\"MLPBNN\"\) )
+	(cd test && root -l -b -q -n ${ROOTSYS}/tutorials/tmva/TMVAClassification.C\(\"MLPBNN\"\) )
 
 test: cplusplus test/files/tmva_class_example.root test/dataset/weights/TMVAClassification_MLPBNN.weights.xml
 	rm -f test/TESTOUTPUT.root
 	src/main test/files/tmva_class_example.root TreeS test/dataset/weights/TMVAClassification_MLPBNN.weights.xml test/TESTOUTPUT.root MLPBNN_from_branchadder
 
-.PHONY: clean cplusplus py install test
+prepare_examples:
+	mkdir -p examples
+	(cd examples && root -l -b -q -n ${ROOTSYS}/tutorials/tmva/TMVAClassification.C )
+
+.PHONY: clean cplusplus py install test prepare_examples

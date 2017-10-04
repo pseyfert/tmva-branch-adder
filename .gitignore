@@ -1,5 +1,8 @@
 src/main
 test
+examples/TMVA.root
+examples/dataset/
+examples/files/
 
 # Compiled Object files
 *.slo
