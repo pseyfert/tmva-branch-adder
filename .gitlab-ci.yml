@@ -13,8 +13,14 @@ install:
     - source /cvmfs/sft.cern.ch/lcg/views/LCG_latest/x86_64-slc6-gcc62-opt/setup.sh
     - make install
 
-rootdocker:
+rootdocker-build:
   stage: build
+  image: rootproject/root-ubuntu16
+  script:
+    - sudo make
+
+rootdocker-run:
+  stage: run
   image: rootproject/root-ubuntu16
   script:
     - sudo apt-get update
