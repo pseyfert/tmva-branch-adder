@@ -17,7 +17,7 @@ rootdocker-build:
   stage: build
   image: rootproject/root-ubuntu16
   script:
-    - sudo make
+    - sudo make -C src
 
 rootdocker-run:
   stage: run
@@ -26,6 +26,7 @@ rootdocker-run:
     - sudo apt-get update
     - sudo apt-get upgrade -y
     - sudo apt-get install -y curl
+    - source thisroot.sh
     - sudo make install
     - curl -O http://root.cern.ch/files/tmva_class_example.root
     - tmva-branch-adder tmva_class_example.root TreeS test/TMVAClassification_MLPBNN.weights.xml out.root
