@@ -26,7 +26,9 @@ rootdocker-run:
     - sudo apt-get update
     - sudo apt-get upgrade -y
     - sudo apt-get install -y curl
+    - set +e
     - source thisroot.sh
+    - set -e
     - sudo make install
     - make test
     - tmva-branch-adder test/TESTOUTPUT.root TreeS test/dataset/weights/TMVAClassification_MLPBNN.weights.xml test/secondtest.root MLPBNN_from_branchadder2
