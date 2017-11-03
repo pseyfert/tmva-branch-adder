@@ -322,7 +322,7 @@ int reader_wrapper::SetTargetFile(TDirectoryFile *file)
 
 /**
  * @brief Specify the target branch name, which will be created in initFormulas. Checks the validity of the branch name.
- * 
+ *
  * If possible, it is checked if the branch name would create trouble in
  * TTree::Draw or TTree::MakeClass when using the output file.
  *
