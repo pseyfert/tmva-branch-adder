@@ -29,7 +29,8 @@ in a C++ program.
 
 ## Acknowledgements
 
-Thanks for input from
+Thanks for input from (cern, slack, mattermost, github, stackoverflow,
+robust-irc, root-forum usernames):
  * ttekampe
  * @ibab
  * burney
@@ -37,6 +38,10 @@ Thanks for input from
  * fkruse
  * sur5r
  * @petitcactusorange
+ * fredi
+ * lisovsky
+ * mvesteri
+ * rquaglia
 
 # TODO
 
@@ -52,3 +57,20 @@ when using gcc 4.8 (not fully c++11 compatible).
 
  * [CERN ROOT](https://root.cern.ch/) and its dependencies
  * zsh tab completion requires [root_numpy](https://pypi.python.org/pypi/root_numpy)
+
+# Contributing
+
+I would be happy if someone can review/test the python interface, suggest an
+interface that fits users better, maybe even add a numpy interface (well, that
+might as well be an independent project on its own). For those, feel invited to
+submit pull requests or issues, such that even if you only have a suggestion
+and I cannot implement it, other visitors can pick up your suggestion to make
+the world a little bit better.
+
+# License
+
+The project is licensed under GPL. If this is an issue for you (you want to
+include it / link against it / reuse parts of it in your project and use a
+LGPL, MIT, Apache, BSD, whathaveyou license), you can get in contact with me to
+discuss double-licensing the tmva-branch-adder (e.g. for an inclusion in the
+"upstream project" TMVA).
