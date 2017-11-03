@@ -1,9 +1,10 @@
 TMVALOC  ?= $(shell root-config --libdir)/..
 TMVALIBS += -L$(TMVALOC)/lib -lTMVA
-LDFLAGS  += $(TMVALIBS)
+LDLIBS   += $(TMVALIBS)
 
 CPPFLAGS += $(shell root-config --cflags) -O2 -g -Wextra -Wall -Wshadow -fPIC # -Wpedantic (not available in gcc 4.6)
-LDFLAGS  += $(shell root-config --libs) -lMinuit -lFoam -lMathMore -lTreePlayer -lXMLIO -lstdc++ -m64 -g
+LDFLAGS  += $(shell root-config --ldflags)
+LDLIBS   += $(shell root-config --libs) -lMinuit -lFoam -lMathMore -lTreePlayer -lXMLIO -lstdc++
 CPP       = $(shell root-config --cxx)
 CXX       = $(shell root-config --cxx)
 CC        = $(shell root-config --cxx)
