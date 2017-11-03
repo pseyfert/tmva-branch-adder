@@ -17,6 +17,8 @@ rootdocker:
   stage: build
   image: rootproject/root-ubuntu16
   script:
+    - sudo apt-get update
+    - sudo apt-get upgrade -y
     - sudo apt-get install -y curl
     - sudo make install
     - curl -O http://root.cern.ch/files/tmva_class_example.root
