@@ -10,14 +10,15 @@ install:
   stage: build
   script:
     - yum install -y glibc-headers glibc-devel git gsl-devel freetype-devel libSM libX11-devel libXext-devel make gcc-c++ gcc binutils libXpm-devel libXft-devel 
-    - source /cvmfs/sft.cern.ch/lcg/views/LCG_latest/x86_64-slc6-gcc49-opt/setup.sh
+    - source /cvmfs/sft.cern.ch/lcg/views/LCG_latest/x86_64-slc6-gcc62-opt/setup.sh
     - make install
 
 rootdocker:
   stage: build
   image: rootproject/root-ubuntu16
   script:
-    - make install
+    - sudo apt-get install -y curl
+    - sudo make install
     - curl -O http://root.cern.ch/files/tmva_class_example.root
     - tmva-branch-adder tmva_class_example.root TreeS test/TMVAClassification_MLPBNN.weights.xml out.root
 
