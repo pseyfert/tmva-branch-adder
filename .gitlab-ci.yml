@@ -19,6 +19,14 @@ rootdocker-build:
   script:
     - sudo make -C src
 
+cmake:
+  stage: build
+  image: rootproject/root-ubuntu16
+  script:
+    - cd $(mktemp -d)
+    - cmake ${CI_PROJECT_DIR} -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=$(mktemp -d) -DCMAKE_RULE_MESSAGES:BOOL=OFF -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
+    - cmake --build . --target install
+
 rootdocker-run:
   stage: run
   image: rootproject/root-ubuntu16
