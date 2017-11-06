@@ -20,7 +20,7 @@ rootdocker-build:
     - sudo make -C src
 
 cmake:
-  stage: build
+  stage: run
   image: rootproject/root-ubuntu16
   script:
     - sudo apt-get update
