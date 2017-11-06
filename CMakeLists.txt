@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.3)
 project(tmva-branch-adder VERSION 0.5)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wshadow")
 find_program(iwyu_path NAMES include-what-you-use iwyu)
