@@ -1,5 +1,8 @@
 #include "blacklist.h"
 #if __cplusplus >= 201103L
+#include <unordered_set>
+#include <cstddef>
+// IWYU pragma: no_include <system_error>
 
 /// http://stackoverflow.com/questions/17885563/using-c11-unordered-set-in-visual-c-and-clang
 //
