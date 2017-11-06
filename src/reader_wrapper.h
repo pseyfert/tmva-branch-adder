@@ -1,29 +1,18 @@
 #pragma once
-#include <stdio.h>
-#include <string.h>
-
+#include <vector>
+#include "RtypesCore.h"
+#include "TString.h"
 #if __cplusplus >= 201103L // at least C++11
-#define branchadder_use_blacklist 1
 #include <unordered_set>
-#include "blacklist.h"
-#else // no C++11
-#warning "Building without additional branch name validation"
 #endif // C++11
 
-// at least g++ 4.9 or clang++
-#if (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) >= 40900 || __clang__
-#define branchadder_use_regex 1
-#include <regex>
-#else // older g++
-#warning "Building test if branch name is a valid c++ variable name"
-#endif // compiler version
-
-#include "TString.h"
-#include "TTree.h"
-#include "TFile.h"
-#include "TDirectoryFile.h"
-#include "TMVA/Reader.h"
-#include "TTreeFormula.h"
+class TBranch;
+class TDirectoryFile;
+class TFile;
+class TObject;
+class TTree;
+class TTreeFormula;
+namespace TMVA { class Reader; }
 
 class VariableWrapper {
 public:
