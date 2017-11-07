@@ -41,7 +41,6 @@ rootdocker-run:
     - source thisroot.sh
     - set -e
     - sudo make install
-    - make test
     - mkdir -p test
     - (cd test && root -l -b -q -n /usr/local/share/doc/root/tutorials/tmva/TMVAClassification.C\(\"MLPBNN\"\) )
     - INPUTSFILE=$(find . -name tmva_class_example.root)
