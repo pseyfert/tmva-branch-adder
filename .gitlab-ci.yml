@@ -42,6 +42,8 @@ rootdocker-run:
     - set -e
     - sudo make install
     - make test
+    - mkdir -p test
+    - (cd test && root -l -b -q -n /usr/local/tutorials/tmva/TMVAClassification.C\(\"MLPBNN\"\) )
     - tmva-branch-adder test/TESTOUTPUT.root TreeS test/dataset/weights/TMVAClassification_MLPBNN.weights.xml test/secondtest.root MLPBNN_from_branchadder2
 
 
@@ -63,7 +65,7 @@ root5:
     - source /cvmfs/lhcb.cern.ch/lib/lhcb/LBSCRIPTS/prod/InstallArea/scripts/SetupProject.sh ROOT 5.34.10
     - make install
     - mkdir -p test
-    - (cd test && root -l -b -q -n /usr/local/tutorials/tmva/TMVAClassification.C\(\"MLPBNN\"\) )
+    - (cd test && root -l -b -q -n ${ROOTSYS}/tmva/test/TMVAClassification.C\(\"MLPBNN\"\) )
     - tmva-branch-adder test/tmva_class_example.root TreeS test/weights/TMVAClassification_MLPBNN.weights.xml test/secondtest.root MLPBNN_from_branchadder2
 
 gcc48:
