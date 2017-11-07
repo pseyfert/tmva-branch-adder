@@ -1,10 +1,18 @@
 #pragma once
 #include <vector>
-#include "RtypesCore.h"
 #include "TString.h"
 #if __cplusplus >= 201103L // at least C++11
 #include <unordered_set>
 #endif // C++11
+
+
+// Rtypes got split in root 6
+#include "RVersion.h"
+#if ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
+#include "Rtypes.h"
+#else
+#include "RtypesCore.h"
+#endif
 
 class TBranch;
 class TDirectoryFile;
