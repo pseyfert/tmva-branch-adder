@@ -75,8 +75,10 @@ gcc48:
     - source /cvmfs/lhcb.cern.ch/lib/lhcb/LBSCRIPTS/prod/InstallArea/scripts/LbLogin.sh -c x86_64-slc6-gcc48-opt
     - source /cvmfs/lhcb.cern.ch/lib/lhcb/LBSCRIPTS/prod/InstallArea/scripts/SetupProject.sh ROOT 6.06.00
     - make install
-    - make test || tree
-    - tmva-branch-adder test/TESTOUTPUT.root TreeS test/dataset/weights/TMVAClassification_MLPBNN.weights.xml test/secondtest.root MLPBNN_from_branchadder2
+    - (cd test && root -l -b -q -n ${ROOTSYS}/tutorials/tmva/TMVAClassification.C\(\"MLPBNN\"\) )
+    - INPUTSFILE=$(find . -name tmva_class_example.root)
+    - WEIGHTFILE=$(find . -name TMVAClassification_MLPBNN.weights.xml)
+    - tmva-branch-adder "$INPUTSFILE" TreeS "$WEIGHTFILE" test/testoutput.root MLPBNN_from_branchadder
 
 gcc49:
   stage: run
@@ -87,5 +89,7 @@ gcc49:
     - source /cvmfs/lhcb.cern.ch/lib/lhcb/LBSCRIPTS/prod/InstallArea/scripts/LbLogin.sh -c x86_64-slc6-gcc49-opt
     - source /cvmfs/lhcb.cern.ch/lib/lhcb/LBSCRIPTS/prod/InstallArea/scripts/SetupProject.sh ROOT 6.06.02
     - make install
-    - make test || tree
-    - tmva-branch-adder test/TESTOUTPUT.root TreeS test/dataset/weights/TMVAClassification_MLPBNN.weights.xml test/secondtest.root MLPBNN_from_branchadder2
+    - (cd test && root -l -b -q -n ${ROOTSYS}/tutorials/tmva/TMVAClassification.C\(\"MLPBNN\"\) )
+    - INPUTSFILE=$(find . -name tmva_class_example.root)
+    - WEIGHTFILE=$(find . -name TMVAClassification_MLPBNN.weights.xml)
+    - tmva-branch-adder "$INPUTSFILE" TreeS "$WEIGHTFILE" test/testoutput.root MLPBNN_from_branchadder
