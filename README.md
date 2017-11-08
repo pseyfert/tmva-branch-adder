@@ -39,7 +39,8 @@ tmva-branch-adder in your CMake project, it might have advantages for you to
 use CMake. (Or you might have other reasons to favour CMake as well.)
 
 ```shell
-mkdir build
+mkdir -p build
+cd build
 cmake .. -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=${HOME}/.local -DCMAKE_RULE_MESSAGES:BOOL=OFF -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
 cmake --build . --clean-first --target install
 ```
@@ -47,6 +48,27 @@ cmake --build . --clean-first --target install
 I usually recommend out-of-source build, but in source build should work as
 well. Most of the CMake settings I provide above are just my personal taste,
 feel free to omit or adjust.
+
+### IWYU
+
+The CMake build will try to run include-what-you-use *if it is available*. This
+can be switched off by invalidating the `iwyu_path` CMake variable. The most
+beginner friendly way to do that is probably `ccmake`:
+
+```shell
+mkdir -p build
+cd build
+cmake <path_to_source> <options as above>
+```
+then
+ - go to the line with `iwyu_path`
+ - press `[enter]` to edit the line
+ - `[space][backspace]` to actually edit the line
+ - make it empty `[enter]` to save the change
+ - `[c]`, `[g]` to apply the configuration
+
+Reversely, running CMake with `-Diwyu_path=<path_to_iwyu_binary>` should
+activate include-what-you-use even if it is not found in the `$PATH`.
 
 ## examples
 

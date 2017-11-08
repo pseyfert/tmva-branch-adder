@@ -10,7 +10,10 @@ include(GNUInstallDirs)
 
 add_executable(tmva-branch-adder blacklist.cpp main.cpp reader_wrapper.cpp)
 target_link_libraries(tmva-branch-adder TMVA XMLIO TreePlayer Tree RIO Core)
-set_property(TARGET tmva-branch-adder PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
+
+if(iwyu_path)
+  set_property(TARGET tmva-branch-adder PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
+endif()
 
 add_library(BranchAdder SHARED reader_wrapper.cpp blacklist.cpp)
 set_target_properties(BranchAdder PROPERTIES VERSION ${PROJECT_VERSION})
