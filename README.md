@@ -1,6 +1,7 @@
 # tmva-branch-adder
 [![Licence: GPL v3](https://img.shields.io/github/license/pseyfert/tmva-branch-adder.svg)](LICENSE)
-[![pipeline status](https://gitlab.cern.ch/pseyfert/tmva-branch-adder/badges/master/pipeline.svg)](https://gitlab.cern.ch/pseyfert/tmva-branch-adder/commits/master)
+[![gitlab CI status](https://gitlab.cern.ch/pseyfert/tmva-branch-adder/badges/master/pipeline.svg)](https://gitlab.cern.ch/pseyfert/tmva-branch-adder/commits/master)
+[![travis Status](https://travis-ci.org/pseyfert/tmva-branch-adder.svg?branch=master)](https://travis-ci.org/pseyfert/tmva-branch-adder)
 
 A quick wrapper to add a TMVA classifier response to a TTree.
 Ideally without boilerplate code - after all, the xml file knows about the input variables.

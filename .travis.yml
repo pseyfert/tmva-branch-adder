@@ -1,0 +1,8 @@
+language: c++
+services:
+  - docker
+before_install:
+  - docker pull rootproject/root-ubuntu16
+  - docker run -itd --name ROOTIMAGE -v $(pwd):/repo.git rootproject/root-ubuntu16
+script:
+  - docker exec ROOTIMAGE sudo make -C /repo.git/src
