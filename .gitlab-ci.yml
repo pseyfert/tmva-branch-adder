@@ -48,11 +48,11 @@ rootdocker-run:
     - tmva-branch-adder "$INPUTSFILE" TreeS "$WEIGHTFILE" test/testoutput.root MLPBNN_from_branchadder
 
 
-latestlcg:
+bleedingedgelcg:
   stage: run
   script:
     - yum install -y glibc-headers glibc-devel git gsl-devel freetype-devel libSM libX11-devel libXext-devel make gcc-c++ gcc binutils libXpm-devel libXft-devel 
-    - source /cvmfs/sft.cern.ch/lcg/views/LCG_latest/x86_64-slc6-gcc62-opt/setup.sh
+    - source /cvmfs/sft.cern.ch/lcg/views/dev3/x86_64-slc6-gcc62-opt/setup.sh
     - make install
     - make test
     - tmva-branch-adder test/TESTOUTPUT.root TreeS test/dataset/weights/TMVAClassification_MLPBNN.weights.xml test/secondtest.root MLPBNN_from_branchadder2
