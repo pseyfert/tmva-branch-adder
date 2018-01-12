@@ -23,21 +23,21 @@ jobs:
         - docker exec ROOTIMAGE sudo apt-get install -y ninja-build iwyu
         - docker exec ROOTIMAGE mkdir -p /tmp/build
         - docker exec ROOTIMAGE mkdir -p /tmp/install
-        - docker exec ROOTIMAGE cmake -B/tmp/build -H/repo.git -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=/tmp/install) -DCMAKE_RULE_MESSAGES:BOOL=OFF -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
+        - docker exec ROOTIMAGE cmake -B/tmp/build -H/repo.git -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=/tmp/install -DCMAKE_RULE_MESSAGES:BOOL=OFF -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
         - docker exec ROOTIMAGE cmake --build /tmp/build --target install
     - stage: runtime-test
       script:
         - docker pull rootproject/root-ubuntu16
-        - docker run -itd --name ROOTIMAGE -v $(pwd):/repo.git rootproject/root-ubuntu16
+        - mkdir -p /tmp/test
+        - docker run -itd --name ROOTIMAGE -v $(pwd):/repo.git -v /tmp/test:/tmp/test rootproject/root-ubuntu16
         - docker exec ROOTIMAGE sudo apt-get update
         - docker exec ROOTIMAGE sudo apt-get upgrade -y
         - docker exec ROOTIMAGE sudo apt-get install -y curl
-        - docker exec ROOTIMAGE source thisroot.sh
-        - docker exec ROOTIMAGE (cd /repo.git ; sudo make install)
+        - docker exec ROOTIMAGE sudo make -C /repo.git install
         - docker exec ROOTIMAGE mkdir -p /tmp/test
-        - docker exec ROOTIMAGE (cd /tmp/test && root -l -b -q -n /usr/local/share/doc/root/tutorials/tmva/TMVAClassification.C\(\"MLPBNN\"\) )
-        - docker exec ROOTIMAGE INPUTSFILE=$(find . -name tmva_class_example.root)
-        - docker exec ROOTIMAGE WEIGHTFILE=$(find . -name TMVAClassification_MLPBNN.weights.xml)
+        - docker exec ROOTIMAGE /bin/bash -c 'cd /tmp/test && root -l -b -q -n /usr/local/share/doc/root/tutorials/tmva/TMVAClassification.C\(\"MLPBNN\"\)'
+        - INPUTSFILE=$(find /tmp/test -name tmva_class_example.root)
+        - WEIGHTFILE=$(find /tmp/test -name TMVAClassification_MLPBNN.weights.xml)
         - docker exec ROOTIMAGE tmva-branch-adder "$INPUTSFILE" TreeS "$WEIGHTFILE" test/testoutput.root MLPBNN_from_branchadder
 
 
