@@ -38,6 +38,7 @@ jobs:
         - docker exec ROOTIMAGE /bin/bash -c 'cd /tmp/test && root -l -b -q -n /usr/local/share/doc/root/tutorials/tmva/TMVAClassification.C\(\"MLPBNN\"\)'
         - INPUTSFILE=$(find /tmp/test -name tmva_class_example.root)
         - WEIGHTFILE=$(find /tmp/test -name TMVAClassification_MLPBNN.weights.xml)
+        - echo tmva-branch-adder "$INPUTSFILE" TreeS "$WEIGHTFILE" test/testoutput.root MLPBNN_from_branchadder
         - docker exec ROOTIMAGE tmva-branch-adder "$INPUTSFILE" TreeS "$WEIGHTFILE" test/testoutput.root MLPBNN_from_branchadder
 
 
