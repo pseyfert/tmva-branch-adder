@@ -1,4 +1,5 @@
 # tmva-branch-adder
+[![DOI](https://zenodo.org/badge/54739571.svg)](https://zenodo.org/badge/latestdoi/54739571)
 [![Licence: GPL v3](https://img.shields.io/github/license/pseyfert/tmva-branch-adder.svg)](LICENSE)
 [![gitlab CI status](https://gitlab.cern.ch/pseyfert/tmva-branch-adder/badges/master/pipeline.svg)](https://gitlab.cern.ch/pseyfert/tmva-branch-adder/commits/master)
 [![travis Status](https://travis-ci.org/pseyfert/tmva-branch-adder.svg?branch=master)](https://travis-ci.org/pseyfert/tmva-branch-adder)
