@@ -30,25 +30,22 @@ cmake:
     - cmake ${CI_PROJECT_DIR} -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=$(mktemp -d) -DCMAKE_RULE_MESSAGES:BOOL=OFF -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
     - cmake --build . --target install
 
-# Fails, but (rerunning previous jobs) turns out due to outside changes. (container????)
-# disabling for release (feel free to call this an anti-pattern
-#
-#rootdocker-run:
-#  stage: run
-#  image: rootproject/root-ubuntu16
-#  script:
-#    - sudo apt-get update
-#    - sudo apt-get upgrade -y
-#    - sudo apt-get install -y curl
-#    - set +e
-#    - source thisroot.sh
-#    - set -e
-#    - sudo make install
-#    - mkdir -p test
-#    - (cd test && root -l -b -q -n /usr/local/share/doc/root/tutorials/tmva/TMVAClassification.C\(\"MLPBNN\"\) )
-#    - INPUTSFILE=$(find . -name tmva_class_example.root)
-#    - WEIGHTFILE=$(find . -name TMVAClassification_MLPBNN.weights.xml)
-#    - tmva-branch-adder "$INPUTSFILE" TreeS "$WEIGHTFILE" test/testoutput.root MLPBNN_from_branchadder
+rootdocker-run:
+  stage: run
+  image: rootproject/root-ubuntu16
+  script:
+    - sudo apt-get update
+    - sudo apt-get upgrade -y
+    - sudo apt-get install -y curl
+    - set +e
+    - source thisroot.sh
+    - set -e
+    - sudo make install
+    - mkdir -p test
+    - (cd test && root -l -b -q -n /usr/local/tutorials/tmva/TMVAClassification.C\(\"MLPBNN\"\) )
+    - INPUTSFILE=$(find . -name tmva_class_example.root)
+    - WEIGHTFILE=$(find . -name TMVAClassification_MLPBNN.weights.xml)
+    - tmva-branch-adder "$INPUTSFILE" TreeS "$WEIGHTFILE" test/testoutput.root MLPBNN_from_branchadder
 
 
 bleedingedgelcg:
