@@ -35,11 +35,11 @@ jobs:
         - docker exec ROOTIMAGE sudo apt-get install -y curl
         - docker exec ROOTIMAGE sudo make -C /repo.git install
         - docker exec ROOTIMAGE mkdir -p /tmp/test
-        - docker exec ROOTIMAGE /bin/bash -c 'cd /tmp/test && root -l -b -q -n /usr/local/tutorials/tmva/TMVAClassification.C\(\"MLPBNN\"\)'
-        - INPUTSFILE=$(find /tmp/test -name tmva_class_example.root)
-        - WEIGHTFILE=$(find /tmp/test -name TMVAClassification_MLPBNN.weights.xml)
-        - echo tmva-branch-adder "$INPUTSFILE" TreeS "$WEIGHTFILE" test/testoutput.root MLPBNN_from_branchadder
-        - docker exec ROOTIMAGE tmva-branch-adder "$INPUTSFILE" TreeS "$WEIGHTFILE" test/testoutput.root MLPBNN_from_branchadder
+        - docker exec ROOTIMAGE /bin/bash -c 'cd /tmp/test \
+                                              root -l -b -q -n /usr/local/tutorials/tmva/TMVAClassification.C\(\"MLPBNN\"\) \
+                                              INPUTSFILE=$(find /tmp/test -name tmva_class_example.root) \
+                                              WEIGHTFILE=$(find /tmp/test -name TMVAClassification_MLPBNN.weights.xml) \
+                                              tmva-branch-adder "$INPUTSFILE" TreeS "$WEIGHTFILE" test/testoutput.root MLPBNN_from_branchadder'
 
 
 stages:
