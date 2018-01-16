@@ -1,16 +1,41 @@
-#include <stdio.h>
 #include <string.h>
+#include <stddef.h>
 #include <iostream>
-#if __cplusplus >= 201103
-#include <unordered_set>
-#endif
+#include <string>
+// at least g++ 4.9 or clang++
+#if (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) >= 40900 || __clang__
+#define branchadder_use_regex 1
+#include <regex>
+#else // older g++
+#warning "Building test if branch name is a valid c++ variable name"
+#endif // compiler version
+#include "TTreeFormula.h"
+#include "TBranch.h"
+#include "TLeaf.h"
 #include "TString.h"
 #include "TTree.h"
 #include "TFile.h"
 #include "TDirectory.h"
+#include "TDirectoryFile.h"
 #include "TMVA/Tools.h"
 #include "TMVA/Reader.h"
+#include "TMVA/VariableInfo.h"
 #include "reader_wrapper.h"
+
+
+// IWYU pragma: no_include <ext/alloc_traits.h>
+// IWYU pragma: no_include "TObject.h"
+// IWYU pragma: no_include "TXMLEngine.h"
+
+
+#if __cplusplus >= 201103L // at least C++11
+#define branchadder_use_blacklist 1
+#include <unordered_set>
+#include "blacklist.h"
+#else // no C++11
+#warning "Building without additional branch name validation"
+#endif // C++11
+
 
 /**
  * @brief boiler plate for most bare use case
@@ -322,7 +347,7 @@ int reader_wrapper::SetTargetFile(TDirectoryFile *file)
 
 /**
  * @brief Specify the target branch name, which will be created in initFormulas. Checks the validity of the branch name.
- * 
+ *
  * If possible, it is checked if the branch name would create trouble in
  * TTree::Draw or TTree::MakeClass when using the output file.
  *

@@ -1,6 +1,6 @@
 before_script:
   # from https://root.cern.ch/build-prerequisites
-  - yum install -y glibc-headers glibc-devel git gsl-devel freetype-devel libSM libX11-devel libXext-devel make gcc-c++ gcc binutils libXpm-devel libXft-devel 
+  - echo "no before_script anymore due to different images for different tests"
 
 stages:
   - build
@@ -9,44 +9,92 @@ stages:
 install:
   stage: build
   script:
-    - source /cvmfs/sft.cern.ch/lcg/views/LCG_latest/x86_64-slc6-gcc49-opt/setup.sh
+    - yum install -y glibc-headers glibc-devel git gsl-devel freetype-devel libSM libX11-devel libXext-devel make gcc-c++ gcc binutils libXpm-devel libXft-devel 
+    - source /cvmfs/sft.cern.ch/lcg/views/dev3/latest/x86_64-slc6-gcc62-opt/setup.sh
     - make install
 
-latestlcg:
+rootdocker-build:
+  stage: build
+  image: rootproject/root-ubuntu16
+  script:
+    - sudo make -C src
+
+cmake:
+  stage: run
+  image: rootproject/root-ubuntu16
+  script:
+    - sudo apt-get update
+    - sudo apt-get upgrade -y
+    - sudo apt-get install -y ninja-build iwyu
+    - cd $(mktemp -d)
+    - cmake ${CI_PROJECT_DIR} -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=$(mktemp -d) -DCMAKE_RULE_MESSAGES:BOOL=OFF -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
+    - cmake --build . --target install
+
+rootdocker-run:
+  stage: run
+  image: rootproject/root-ubuntu16
+  script:
+    - sudo apt-get update
+    - sudo apt-get upgrade -y
+    - sudo apt-get install -y curl
+    - set +e
+    - source thisroot.sh
+    - set -e
+    - sudo make install
+    - mkdir -p test
+    - (cd test && root -l -b -q -n /usr/local/tutorials/tmva/TMVAClassification.C\(\"MLPBNN\"\) )
+    - INPUTSFILE=$(find . -name tmva_class_example.root)
+    - WEIGHTFILE=$(find . -name TMVAClassification_MLPBNN.weights.xml)
+    - tmva-branch-adder "$INPUTSFILE" TreeS "$WEIGHTFILE" test/testoutput.root MLPBNN_from_branchadder
+
+
+bleedingedgelcg:
   stage: run
   script:
-    - source /cvmfs/sft.cern.ch/lcg/views/LCG_latest/x86_64-slc6-gcc49-opt/setup.sh
+    - yum install -y glibc-headers glibc-devel git gsl-devel freetype-devel libSM libX11-devel libXext-devel make gcc-c++ gcc binutils libXpm-devel libXft-devel 
+    - source /cvmfs/sft.cern.ch/lcg/views/dev3/latest/x86_64-slc6-gcc62-opt/setup.sh
     - make install
-    - curl -O http://root.cern.ch/files/tmva_class_example.root
-    - tmva-branch-adder tmva_class_example.root TreeS test/TMVAClassification_MLPBNN.weights.xml out.root
+    - make test
+    - tmva-branch-adder test/TESTOUTPUT.root TreeS test/dataset/weights/TMVAClassification_MLPBNN.weights.xml test/secondtest.root MLPBNN_from_branchadder2
 
 root5:
   stage: run
   script:
+    - yum install -y glibc-headers glibc-devel git gsl-devel freetype-devel libSM libX11-devel libXext-devel make gcc-c++ gcc binutils libXpm-devel libXft-devel 
     - export USER=nobody
     - source /cvmfs/lhcb.cern.ch/lib/lhcb/LBSCRIPTS/prod/InstallArea/scripts/LbLogin.sh -c x86_64-slc6-gcc46-opt
     - source /cvmfs/lhcb.cern.ch/lib/lhcb/LBSCRIPTS/prod/InstallArea/scripts/SetupProject.sh ROOT 5.34.10
     - make install
-    - curl -O http://root.cern.ch/files/tmva_class_example.root
-    - tmva-branch-adder tmva_class_example.root TreeS test/TMVAClassification_MLPBNN.weights.xml out.root
+    - mkdir -p test
+    - (cd test && root -l -b -q -n ${ROOTSYS}/tmva/test/TMVAClassification.C\(\"MLPBNN\"\) )
+    - tmva-branch-adder test/tmva_class_example.root TreeS test/weights/TMVAClassification_MLPBNN.weights.xml test/secondtest.root MLPBNN_from_branchadder2
 
 gcc48:
   stage: run
   script:
+    - yum install -y glibc-headers glibc-devel git gsl-devel freetype-devel libSM libX11-devel libXext-devel make gcc-c++ gcc binutils libXpm-devel libXft-devel 
+    - yum install -y tree
     - export USER=nobody
     - source /cvmfs/lhcb.cern.ch/lib/lhcb/LBSCRIPTS/prod/InstallArea/scripts/LbLogin.sh -c x86_64-slc6-gcc48-opt
     - source /cvmfs/lhcb.cern.ch/lib/lhcb/LBSCRIPTS/prod/InstallArea/scripts/SetupProject.sh ROOT 6.06.00
     - make install
-    - curl -O http://root.cern.ch/files/tmva_class_example.root
-    - tmva-branch-adder tmva_class_example.root TreeS test/TMVAClassification_MLPBNN.weights.xml out.root
-
+    - mkdir -p test
+    - (cd test && root -l -b -q -n ${ROOTSYS}/tutorials/tmva/TMVAClassification.C\(\"MLPBNN\"\) )
+    - INPUTSFILE=$(find . -name tmva_class_example.root)
+    - WEIGHTFILE=$(find . -name TMVAClassification_MLPBNN.weights.xml)
+    - tmva-branch-adder "$INPUTSFILE" TreeS "$WEIGHTFILE" test/testoutput.root MLPBNN_from_branchadder
 
 gcc49:
   stage: run
   script:
+    - yum install -y glibc-headers glibc-devel git gsl-devel freetype-devel libSM libX11-devel libXext-devel make gcc-c++ gcc binutils libXpm-devel libXft-devel 
+    - yum install -y tree
     - export USER=nobody
     - source /cvmfs/lhcb.cern.ch/lib/lhcb/LBSCRIPTS/prod/InstallArea/scripts/LbLogin.sh -c x86_64-slc6-gcc49-opt
     - source /cvmfs/lhcb.cern.ch/lib/lhcb/LBSCRIPTS/prod/InstallArea/scripts/SetupProject.sh ROOT 6.06.02
     - make install
-    - curl -O http://root.cern.ch/files/tmva_class_example.root
-    - tmva-branch-adder tmva_class_example.root TreeS test/TMVAClassification_MLPBNN.weights.xml out.root
+    - mkdir -p test
+    - (cd test && root -l -b -q -n ${ROOTSYS}/tutorials/tmva/TMVAClassification.C\(\"MLPBNN\"\) )
+    - INPUTSFILE=$(find . -name tmva_class_example.root)
+    - WEIGHTFILE=$(find . -name TMVAClassification_MLPBNN.weights.xml)
+    - tmva-branch-adder "$INPUTSFILE" TreeS "$WEIGHTFILE" test/testoutput.root MLPBNN_from_branchadder

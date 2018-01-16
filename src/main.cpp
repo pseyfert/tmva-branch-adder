@@ -1,10 +1,8 @@
-#include <stdio.h>
+#include <stddef.h>
 #include <string.h>
 #include <iostream>
 #include <vector>
 #include "TString.h"
-#include "TTree.h"
-#include "TFile.h"
 #include "reader_wrapper.h"
 
 void usage(char **argv)
