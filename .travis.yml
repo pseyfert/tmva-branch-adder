@@ -17,34 +17,33 @@ jobs:
     - stage: install-test
       script:
         - docker pull rootproject/root-ubuntu16
-        - docker run -it --name ROOTIMAGE -v ${TRAVIS_BUILD_DIR}:/repo.git rootproject/root-ubuntu16 /bin/bash -c '
-          set -e \
-          set -x \
-          sudo apt-get update \
-          sudo apt-get upgrade -y \
-          sudo apt-get install -y ninja-build iwyu \
-          cd $(mktemp -d) \
-          cmake ${CI_PROJECT_DIR} -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=$(mktemp -d) -DCMAKE_RULE_MESSAGES:BOOL=OFF -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
-          cmake --build . --target install '
+        - docker run -it -v ${TRAVIS_BUILD_DIR}:/repo.git rootproject/root-ubuntu16 /bin/bash -c '
+          set -e
+          set -x
+          sudo apt-get update
+          sudo apt-get upgrade -y
+          sudo apt-get install -y ninja-build iwyu
+          cd $(mktemp -d)
+          cmake ${CI_PROJECT_DIR} -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=$(mktemp -d) -DCMAKE_RULE_MESSAGES:BOOL=OFF -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
+          cmake --build . --target install'
     - stage: runtime-test
       script:
         - docker pull rootproject/root-ubuntu16
         - mkdir -p /tmp/test
-        - docker run -it --name ROOTIMAGE -v ${TRAVIS_BUILD_DIR}:/repo.git -v /tmp/test:/tmp/test rootproject/root-ubuntu16 /bin/bash -c '
-          set -e \
-          set -x \
-          sudo apt-get update \
-          sudo apt-get upgrade -y \
-          sudo apt-get install -y curl \
-          set +e \
-          source thisroot.sh \
-          set -e \
-          sudo make install \
-          mkdir -p test \
-          (cd test && root -l -b -q -n /usr/local/share/doc/root/tutorials/tmva/TMVAClassification.C\(\"MLPBNN\"\) ) \
-          INPUTSFILE=$(find . -name tmva_class_example.root) \
-          WEIGHTFILE=$(find . -name TMVAClassification_MLPBNN.weights.xml) \
-          echo "$INPUTSFILE" TreeS "$WEIGHTFILE" test/testoutput.root MLPBNN_from_branchadder \
+        - docker run -it -v ${TRAVIS_BUILD_DIR}:/repo.git -v /tmp/test:/tmp/test rootproject/root-ubuntu16 /bin/bash -c '
+          set -e
+          set -x
+          sudo apt-get update
+          sudo apt-get upgrade -y
+          sudo apt-get install -y curl
+          sudo make install
+          mkdir -p test
+          cd test
+          root -l -b -q -n /usr/local/share/doc/root/tutorials/tmva/TMVAClassification.C\(\"MLPBNN\"\)
+          cd ..
+          INPUTSFILE=$(find . -name tmva_class_example.root)
+          WEIGHTFILE=$(find . -name TMVAClassification_MLPBNN.weights.xml)
+          echo "$INPUTSFILE" TreeS "$WEIGHTFILE" test/testoutput.root MLPBNN_from_branchadder
           tmva-branch-adder "$INPUTSFILE" TreeS "$WEIGHTFILE" test/testoutput.root MLPBNN_from_branchadder '
 
 stages:

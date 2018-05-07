@@ -37,9 +37,6 @@ rootdocker-run:
     - sudo apt-get update
     - sudo apt-get upgrade -y
     - sudo apt-get install -y curl
-    - set +e
-    - source thisroot.sh
-    - set -e
     - sudo make install
     - mkdir -p test
     - (cd test && root -l -b -q -n /usr/local/share/doc/root/tutorials/tmva/TMVAClassification.C\(\"MLPBNN\"\) )
