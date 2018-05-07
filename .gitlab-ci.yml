@@ -42,7 +42,7 @@ rootdocker-run:
     - set -e
     - sudo make install
     - mkdir -p test
-    - (cd test && root -l -b -q -n /usr/local/tutorials/tmva/TMVAClassification.C\(\"MLPBNN\"\) )
+    - (cd test && root -l -b -q -n /usr/local/share/doc/root/tutorials/tmva/TMVAClassification.C\(\"MLPBNN\"\) )
     - INPUTSFILE=$(find . -name tmva_class_example.root)
     - WEIGHTFILE=$(find . -name TMVAClassification_MLPBNN.weights.xml)
     - echo "$INPUTSFILE" TreeS "$WEIGHTFILE" test/testoutput.root MLPBNN_from_branchadder
