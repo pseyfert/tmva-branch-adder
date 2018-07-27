@@ -11,7 +11,7 @@ _rootfile() {
 }
 
 _listtrees() {
-  _wanted arguments expl "input ttree name" compadd $(python -c "from root_numpy import list_trees;exec '''for t in list_trees('$words[$CURRENT-1]'):\n print t'''")
+  _wanted arguments expl "input ttree name" compadd $(python -c "from root_numpy import list_trees;exec('''for t in list_trees('$words[$CURRENT-1]'):\n print(t)''')")
 }
 
 _arguments "1:input file:_rootfile" "2:input ttree name:_listtrees" "3:xml file:_files -g '*.xml'" "4:output file:_rootfile" "5:output branch name:"
