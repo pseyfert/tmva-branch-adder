@@ -1,46 +1,50 @@
-language: c++ # irrelevant afaiu
+sudo: required
+
+language: cpp
+
 services:
   - docker
-#before_install:
-#  - docker pull rootproject/root-ubuntu16
-#  - docker run -itd --name ROOTIMAGE -v $(pwd):/repo.git rootproject/root-ubuntu16
-#script:
-#  - docker exec ROOTIMAGE sudo make -C /repo.git/src
 
+# attempting to implement suggestion by
+# https://stackoverflow.com/a/50107380
 jobs:
   include:
     - stage: src-subdir
       script:
         - docker pull rootproject/root-ubuntu16
-        - docker run -itd --name ROOTIMAGE -v $(pwd):/repo.git rootproject/root-ubuntu16
+        - docker run -itd --name ROOTIMAGE -v ${TRAVIS_BUILD_DIR}:/repo.git rootproject/root-ubuntu16
         - docker exec ROOTIMAGE sudo make -C /repo.git/src
     - stage: install-test
       script:
         - docker pull rootproject/root-ubuntu16
-        - docker run -itd --name ROOTIMAGE -v $(pwd):/repo.git rootproject/root-ubuntu16
-        - docker exec ROOTIMAGE sudo apt-get update
-        - docker exec ROOTIMAGE sudo apt-get upgrade -y
-        - docker exec ROOTIMAGE sudo apt-get install -y ninja-build iwyu
-        - docker exec ROOTIMAGE mkdir -p /tmp/build
-        - docker exec ROOTIMAGE mkdir -p /tmp/install
-        - docker exec ROOTIMAGE cmake -B/tmp/build -H/repo.git -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=/tmp/install -DCMAKE_RULE_MESSAGES:BOOL=OFF -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
-        - docker exec ROOTIMAGE cmake --build /tmp/build --target install
+        - docker run -it -v ${TRAVIS_BUILD_DIR}:/repo.git rootproject/root-ubuntu16 /bin/bash -c '
+          set -e
+          set -x
+          sudo apt-get update
+          sudo apt-get upgrade -y
+          sudo apt-get install -y ninja-build iwyu
+          cd $(mktemp -d)
+          cmake ${CI_PROJECT_DIR} -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=$(mktemp -d) -DCMAKE_RULE_MESSAGES:BOOL=OFF -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
+          cmake --build . --target install'
     - stage: runtime-test
       script:
         - docker pull rootproject/root-ubuntu16
         - mkdir -p /tmp/test
-        - docker run -itd --name ROOTIMAGE -v $(pwd):/repo.git -v /tmp/test:/tmp/test rootproject/root-ubuntu16
-        - docker exec ROOTIMAGE sudo apt-get update
-        - docker exec ROOTIMAGE sudo apt-get upgrade -y
-        - docker exec ROOTIMAGE sudo apt-get install -y curl
-        - docker exec ROOTIMAGE sudo make -C /repo.git install
-        - docker exec ROOTIMAGE mkdir -p /tmp/test
-        - docker exec ROOTIMAGE /bin/bash -c 'cd /tmp/test \
-                                              root -l -b -q -n /usr/local/tutorials/tmva/TMVAClassification.C\(\"MLPBNN\"\) \
-                                              INPUTSFILE=$(find /tmp/test -name tmva_class_example.root) \
-                                              WEIGHTFILE=$(find /tmp/test -name TMVAClassification_MLPBNN.weights.xml) \
-                                              tmva-branch-adder "$INPUTSFILE" TreeS "$WEIGHTFILE" test/testoutput.root MLPBNN_from_branchadder'
-
+        - docker run -it -v ${TRAVIS_BUILD_DIR}:/repo.git -v /tmp/test:/tmp/test rootproject/root-ubuntu16 /bin/bash -c '
+          set -e
+          set -x
+          sudo apt-get update
+          sudo apt-get upgrade -y
+          sudo apt-get install -y curl
+          sudo make install
+          mkdir -p test
+          cd test
+          root -l -b -q -n /usr/local/share/doc/root/tutorials/tmva/TMVAClassification.C\(\"MLPBNN\"\)
+          cd ..
+          INPUTSFILE=$(find . -name tmva_class_example.root)
+          WEIGHTFILE=$(find . -name TMVAClassification_MLPBNN.weights.xml)
+          echo "$INPUTSFILE" TreeS "$WEIGHTFILE" test/testoutput.root MLPBNN_from_branchadder
+          tmva-branch-adder "$INPUTSFILE" TreeS "$WEIGHTFILE" test/testoutput.root MLPBNN_from_branchadder '
 
 stages:
   - src-subdir
