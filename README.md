@@ -83,7 +83,7 @@ in a C++ program.
 ## Dependencies
 
  * [CERN ROOT](https://root.cern.ch/) and its dependencies
- * zsh tab completion requires [root_numpy](https://pypi.python.org/pypi/root_numpy)
+ * zsh tab completion requires [root-ls-tree](https://github.com/pseyfert/go-list-root-trees)
 
 # Organisatorial matters
 
@@ -102,6 +102,8 @@ robust-irc, root-forum usernames):
  * lisovsky
  * mvesteri
  * rquaglia
+ * ndawe
+ * 0xb1ns
 
 ## TODO / Wishlist
 
