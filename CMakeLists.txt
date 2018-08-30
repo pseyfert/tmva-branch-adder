@@ -47,7 +47,14 @@ include(${ROOT_USE_FILE})
 #### build exe
 
 add_executable(tmva-branch-adder src/blacklist.cpp src/main.cpp src/reader_wrapper.cpp)
-target_link_libraries(tmva-branch-adder TMVA XMLIO TreePlayer Tree RIO Core)
+target_link_libraries(tmva-branch-adder
+  ROOT::TMVA # obvious
+  # ROOT::XMLIO # should come through dependency
+  ROOT::TreePlayer # TTreeFormula
+  ROOT::Tree # TTree, TBranch
+  ROOT::RIO  # TDirectoryFile
+  ROOT::Core # TString
+  )
 target_include_directories(tmva-branch-adder
     PUBLIC
         $<INSTALL_INTERFACE:include>
@@ -76,7 +83,13 @@ target_include_directories(BranchAdder
 )
 target_link_libraries(BranchAdder
   INTERFACE
-  TMVA XMLIO TreePlayer Tree RIO Core)
+  ROOT::TMVA # obvious
+  # ROOT::XMLIO # should come through dependency
+  ROOT::TreePlayer # TTreeFormula
+  ROOT::Tree # TTree, TBranch
+  ROOT::RIO  # TDirectoryFile
+  ROOT::Core # TString
+  )
 
 
 #### install exe
