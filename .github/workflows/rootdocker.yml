@@ -1,6 +1,7 @@
 name: rootdocker
-on: [push]
-on.schedule:
+on:
+  push:
+  schedule:
   - cron: '0 0 1 * *'
 
 jobs:
