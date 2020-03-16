@@ -17,4 +17,5 @@ jobs:
         run: |
           cmake -Bbuild -H. -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=/tmp/install -DCMAKE_RULE_MESSAGES:BOOL=OFF -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
       - name: build
+        run: |
           cmake --build ./build --target install'
