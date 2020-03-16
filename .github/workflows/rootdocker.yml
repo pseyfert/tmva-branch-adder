@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     container: rootproject/root-ubuntu16
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@master
       - name: install deps
         run: |
           sudo apt-get update
