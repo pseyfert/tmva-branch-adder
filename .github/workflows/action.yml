@@ -11,7 +11,8 @@ jobs:
     steps:
       - name: bodge permissions
         run: |
-          sudo chmod -R 777 /
+          sudo mkdir -p /__w
+          sudo chmod -R 777 /__w
       - uses: actions/checkout@master
       - name: install deps
         run: |
