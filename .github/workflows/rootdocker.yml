@@ -8,6 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     container: rootproject/root-ubuntu16
     steps:
+      - uses: actions/checkout@v2
       - name: install deps
         run: |
           sudo apt-get update
@@ -15,7 +16,7 @@ jobs:
           sudo apt-get install -y ninja-build iwyu
       - name: configure
         run: |
-          cmake -Bbuild -H. -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=/tmp/install -DCMAKE_RULE_MESSAGES:BOOL=OFF -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
+          cmake -B/tmp/build -H${GITHUB_WORKSPACE} -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=/tmp/install -DCMAKE_RULE_MESSAGES:BOOL=OFF -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
       - name: build
         run: |
-          cmake --build ./build --target install'
+          cmake --build /tmp/build --target install'
