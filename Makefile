@@ -18,7 +18,7 @@ install: cplusplus
 	install -d -m 0755 $(PREFIX)/lib
 	install -m 0755 src/main $(PREFIX)/bin/tmva-branch-adder
 	install -m 0664 src/reader_wrapper.h $(PREFIX)/include
-	install -m 0644 src/blacklist.h $(PREFIX)/include
+	install -m 0644 src/forbidden_branchnames.h $(PREFIX)/include
 	install -m 0644 src/libBranchAdder.so $(PREFIX)/lib
 
 test/dataset/weights/TMVAClassification_MLPBNN.weights.xml:

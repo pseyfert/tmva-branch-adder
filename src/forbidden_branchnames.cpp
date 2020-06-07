@@ -1,4 +1,4 @@
-#include "blacklist.h"
+#include "forbidden_branchnames.h"
 #if __cplusplus >= 201103L
 #include <unordered_set>
 #include <cstddef>
@@ -16,7 +16,7 @@ namespace std
     };
 }
 
-bool blacklisted(TString checkme) {
+bool isForbiddenBranchName(TString checkme) {
   // mathematical function names
   if (checkme.BeginsWith("TMath")) return true;
   if (checkme.BeginsWith("b_")) return true;
@@ -27,7 +27,7 @@ bool blacklisted(TString checkme) {
   //
   // TODO: missing what's inherited in TTree
   //
-  static const std::unordered_set<TString> blacklist = {
+  static const std::unordered_set<TString> keywordList = {
     "cos", "sin", "tan", "exp", "log", "acos", "asin", "atan", "cosh", "sinh",
     "tanh", "acosh", "asinh", "atanh", "sq", "log10", "abs", "sign", "sqrt",
     "rndm", "min", "max", "atan2", "fmod", "pi", "int", "double", "char",
@@ -104,7 +104,7 @@ bool blacklisted(TString checkme) {
     "TTreeBranchImpRef", "tVal", "tVar", "UnbinnedFit", "UseCurrentStyle",
     "Write", "fChain" ,"fCurrent" ,"Cut" ,"Init" ,"Loop"};
 
-  if (blacklist.end() == blacklist.find(checkme)) return false;
+  if (keywordList.end() == keywordList.find(checkme)) return false;
   return true;
 }
 #endif // __cplusplus >= 201103L

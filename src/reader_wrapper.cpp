@@ -29,9 +29,9 @@
 
 
 #if __cplusplus >= 201103L // at least C++11
-#define branchadder_use_blacklist 1
+#define branchadder_use_blocklist 1
 #include <unordered_set>
-#include "blacklist.h"
+#include "forbidden_branchnames.h"
 #else // no C++11
 #warning "Building without additional branch name validation"
 #endif // C++11
@@ -366,8 +366,8 @@ int reader_wrapper::SetTargetBranch(TString name)
    if (true)
 #endif
    {
-#ifdef branchadder_use_blacklist
-      if (blacklisted(name))
+#ifdef branchadder_use_blocklist
+      if (isForbiddenBranchName(name))
 #else
       if (false)
 #endif

@@ -2,5 +2,5 @@
 #include "TString.h"
 #if __cplusplus >= 201103L
 
-bool blacklisted(TString checkme) ;
+bool isForbiddenBranchName(TString checkme) ;
 #endif /// __cplusplus >= 201103L
