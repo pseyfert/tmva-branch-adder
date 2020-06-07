@@ -1,0 +1,23 @@
+name: rootdocker
+on:
+  push:
+  schedule:
+  - cron: '0 0 1 * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: rootproject/root-ubuntu16
+    steps:
+      - uses: actions/checkout@master
+      - name: install deps
+        run: |
+          sudo apt-get update
+          sudo apt-get upgrade -y
+          sudo apt-get install -y ninja-build iwyu
+      - name: configure
+        run: |
+          cmake -B/tmp/build -H${GITHUB_WORKSPACE} -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=/tmp/install -DCMAKE_RULE_MESSAGES:BOOL=OFF -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
+      - name: build
+        run: |
+          cmake --build /tmp/build --target install'

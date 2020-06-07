@@ -11,16 +11,16 @@ CC        = $(shell root-config --cxx)
 
 all: main libBranchAdder.so
 
-main: main.o reader_wrapper.o blacklist.o
+main: main.o reader_wrapper.o forbidden_branchnames.o
 
-reader_wrapper.o: blacklist.h reader_wrapper.h reader_wrapper.cpp
+reader_wrapper.o: forbidden_branchnames.h reader_wrapper.h reader_wrapper.cpp
 
-blacklist.o: blacklist.h blacklist.cpp
+forbidden_branchnames.o: forbidden_branchnames.h forbidden_branchnames.cpp
 
-main.o: reader_wrapper.h blacklist.h main.cpp
+main.o: reader_wrapper.h forbidden_branchnames.h main.cpp
 
 libBranchAdder.so: SOFLAGS+=-shared -lc
-libBranchAdder.so: reader_wrapper.o blacklist.o
+libBranchAdder.so: reader_wrapper.o forbidden_branchnames.o
 	$(CXX) $(SOFLAGS) -o $@ $^
 
 clean:

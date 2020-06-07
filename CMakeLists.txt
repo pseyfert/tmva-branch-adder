@@ -46,8 +46,15 @@ include(${ROOT_USE_FILE})
 
 #### build exe
 
-add_executable(tmva-branch-adder src/blacklist.cpp src/main.cpp src/reader_wrapper.cpp)
-target_link_libraries(tmva-branch-adder TMVA XMLIO TreePlayer Tree RIO Core)
+add_executable(tmva-branch-adder src/forbidden_branchnames.cpp src/main.cpp src/reader_wrapper.cpp)
+target_link_libraries(tmva-branch-adder
+  ROOT::TMVA # obvious
+  # ROOT::XMLIO # should come through dependency
+  ROOT::TreePlayer # TTreeFormula
+  ROOT::Tree # TTree, TBranch
+  ROOT::RIO  # TDirectoryFile
+  ROOT::Core # TString
+  )
 target_include_directories(tmva-branch-adder
     PUBLIC
         $<INSTALL_INTERFACE:include>
@@ -61,7 +68,7 @@ endif()
 
 #### build lib
 
-add_library(BranchAdder SHARED src/reader_wrapper.cpp src/blacklist.cpp)
+add_library(BranchAdder SHARED src/reader_wrapper.cpp src/forbidden_branchnames.cpp)
 set_target_properties(BranchAdder PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(BranchAdder PROPERTIES PUBLIC_HEADER src/reader_wrapper.h)
 # semi redundant due to ROOT_USE_FILE
@@ -76,7 +83,13 @@ target_include_directories(BranchAdder
 )
 target_link_libraries(BranchAdder
   INTERFACE
-  TMVA XMLIO TreePlayer Tree RIO Core)
+  ROOT::TMVA # obvious
+  # ROOT::XMLIO # should come through dependency
+  ROOT::TreePlayer # TTreeFormula
+  ROOT::Tree # TTree, TBranch
+  ROOT::RIO  # TDirectoryFile
+  ROOT::Core # TString
+  )
 
 
 #### install exe
@@ -89,7 +102,7 @@ install(TARGETS BranchAdder
         PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 #### install header
-install(FILES src/blacklist.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(FILES src/forbidden_branchnames.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 #### configure cmake modules
 # configure tmva-branch-adder-config.cmake

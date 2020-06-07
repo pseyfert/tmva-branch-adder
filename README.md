@@ -83,7 +83,7 @@ in a C++ program.
 ## Dependencies
 
  * [CERN ROOT](https://root.cern.ch/) and its dependencies
- * zsh tab completion requires [root_numpy](https://pypi.python.org/pypi/root_numpy)
+ * zsh tab completion requires [root-ls-tree](https://github.com/pseyfert/go-list-root-trees)
 
 # Organisatorial matters
 
@@ -102,6 +102,8 @@ robust-irc, root-forum usernames):
  * lisovsky
  * mvesteri
  * rquaglia
+ * ndawe
+ * 0xb1ns
 
 ## TODO / Wishlist
 
@@ -113,7 +115,8 @@ robust-irc, root-forum usernames):
 
 Since 0.4 (and on master at the time of writing), tmva-branch-adder should
 build w/ and w/o c++11, as well as with root5 and root6, and with c++11 also
-when using gcc 4.8 (not fully c++11 compatible).
+when using gcc 4.8 (not fully c++11 compatible). ***when using the Makefile***.
+The CMake setup depends on modern CMake exported from ROOT.
 
 ## Contributing
 

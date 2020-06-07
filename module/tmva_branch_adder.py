@@ -27,6 +27,6 @@ def hack_compilation():
 
 
 hack_compilation()
-gInterpreter.LoadMacro("../src/blacklist.cpp+")
+gInterpreter.LoadMacro("../src/forbidden_branchnames.cpp+")
 gInterpreter.LoadMacro("../src/reader_wrapper.cpp+")
 from ROOT import reader_wrapper
